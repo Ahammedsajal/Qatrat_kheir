@@ -1,27 +1,18 @@
-# Uncomment this line to define a global platform for your project
 platform :ios, '15.0'
 install! 'cocoapods', warn_for_unused_master_specs_repo: false
-
-# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 project 'Runner', {
-  'Debug' => :debug,
+  'Debug'   => :debug,
   'Profile' => :release,
   'Release' => :release,
 }
 
 def flutter_root
-  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
-  unless File.exist?(generated_xcode_build_settings_path)
-    raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
-  end
-
-  File.foreach(generated_xcode_build_settings_path) do |line|
-    matches = line.match(/FLUTTER_ROOT\=(.*)/)
-    return matches[1].strip if matches
-  end
-  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
+  generated = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+  raise "#{generated} must exist. Run ‘flutter pub get’ first" unless File.exist?(generated)
+  File.foreach(generated) { |l| return $1.strip if l =~ /FLUTTER_ROOT\=(.*)/ }
+  raise 'FLUTTER_ROOT not found — delete Generated.xcconfig and run flutter pub get'
 end
 
 require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
@@ -30,11 +21,7 @@ flutter_ios_podfile_setup
 
 target 'Runner' do
   use_frameworks!
-
-  # Flutter-managed pods
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
-
-  # Add Firebase Messaging so that Auth.verifyPhoneNumber() gets a valid APNs token
   pod 'Firebase/Messaging'
 
   target 'RunnerTests' do
@@ -43,7 +30,15 @@ target 'Runner' do
 end
 
 post_install do |installer|
-  installer.pods_project.targets.each do |target|
-    flutter_additional_ios_build_settings(target)
+  installer.pods_project.targets.each do |t|
+    flutter_additional_ios_build_settings(t)
+    puts "🛠  Processing pod target: #{t.name}"
+
+    if %w[google_sign_in_ios Pods-google_sign_in_ios].include?(t.name)
+      t.build_configurations.each do |c|
+        c.build_settings['GIDSignIn_SCHEME'] =
+          'com.googleusercontent.apps.388298698922-frg9qq2gln7alrmf0nokvf0h0rhoroof'
+      end
+    end
   end
 end

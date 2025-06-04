@@ -164,141 +164,147 @@ class StateOrder extends State<OrderDetail>
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    deviceHeight = MediaQuery.of(context).size.height;
-    deviceWidth = MediaQuery.of(context).size.width;
-    final model = widget.model!;
-    String? pDate;
-    String? prDate;
-    String? sDate;
-    String? dDate;
-    String? cDate;
-    String? rDate;
-    if (model.listStatus.contains(PLACED)) {
-      pDate = model.listDate![model.listStatus.indexOf(PLACED)];
-      final List d = pDate.split(" ");
-      pDate = d[0] + "\n" + d[1];
-    }
-    if (model.listStatus.contains(PROCESSED)) {
-      prDate = model.listDate![model.listStatus.indexOf(PROCESSED)];
-      final List d = prDate.split(" ");
-      prDate = d[0] + "\n" + d[1];
-    }
-    if (widget.model!.isLocalPickUp != "1") {
-      if (model.listStatus.contains(SHIPED)) {
-        sDate = model.listDate![model.listStatus.indexOf(SHIPED)];
-        final List d = sDate.split(" ");
-        sDate = d[0] + "\n" + d[1];
-      }
-    } else {
-      if (model.listStatus.contains(READY_TO_PICKUP)) {
-        sDate = model.listDate![model.listStatus.indexOf(READY_TO_PICKUP)];
-        final List d = sDate.split(" ");
-        sDate = d[0] + "\n" + d[1];
-      }
-    }
-    if (model.listStatus.contains(DELIVERD)) {
-      dDate = model.listDate![model.listStatus.indexOf(DELIVERD)];
-      final List d = dDate.split(" ");
-      dDate = d[0] + "\n" + d[1];
-    }
-    if (model.listStatus.contains(CANCLED)) {
-      cDate = model.listDate![model.listStatus.indexOf(CANCLED)];
-      final List d = cDate.split(" ");
-      cDate = d[0] + "\n" + d[1];
-    }
-    if (model.listStatus.contains(RETURNED)) {
-      rDate = model.listDate![model.listStatus.indexOf(RETURNED)];
-      final List d = rDate.split(" ");
-      rDate = d[0] + "\n" + d[1];
-    }
-    _isCancleable = model.isCancleable == "1" ? true : false;
-    _isReturnable = model.isReturnable == "1" ? true : false;
-    return PopScope(
-      canPop: _selectedTabIndex == 0,
-      onPopInvokedWithResult: (_, result) {
-        if (_) {
-          if (_tabController.index != 0) {
-            _tabController.animateTo(0);
-          }
-        }
-      },
-      child: SafeArea(
-        bottom: Platform.isAndroid ? false : true,
-        child: AnnotatedRegion(
-          value: SystemUiOverlayStyle(
-            statusBarColor: Theme.of(context).colorScheme.white,
-          ),
-          child: Scaffold(
-            appBar: getSimpleAppBar(
-                getTranslated(context, "ORDER_DETAIL")!, context,),
-            backgroundColor: Theme.of(context).colorScheme.lightWhite,
-            body: _isNetworkAvail
-                ? Stack(
-                    children: [
-                      Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: getSubHeadingsTabBar(),
-                          ),
-                          Expanded(
-                            child: TabBarView(
-                              controller: _tabController,
-                              children: [
-                                getOrderDetails(model),
-                                SingleChildScrollView(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0,),
-                                    child: getSingleProduct(model, PROCESSED),
-                                  ),
-                                ),
-                                SingleChildScrollView(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0,),
-                                    child: getSingleProduct(model, SHIPED),
-                                  ),
-                                ),
-                                SingleChildScrollView(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0,),
-                                    child: getSingleProduct(model, DELIVERD),
-                                  ),
-                                ),
-                                SingleChildScrollView(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0,),
-                                    child: getSingleProduct(model, CANCLED),
-                                  ),
-                                ),
-                                SingleChildScrollView(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0,),
-                                    child: getSingleProduct(model, RETURNED),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      showCircularProgress(context, _isProgress,
-                          Theme.of(context).colorScheme.primarytheme,),
-                    ],
-                  )
-                : noInternet(context),
-          ),
-        ),
-      ),
-    );
+ @override
+@override
+Widget build(BuildContext context) {
+  super.build(context);
+
+  // Update your device dimensions if you need them elsewhere
+  deviceHeight = MediaQuery.of(context).size.height;
+  deviceWidth  = MediaQuery.of(context).size.width;
+
+  final model = widget.model!;
+  String? pDate, prDate, sDate, dDate, cDate, rDate;
+
+  // ─── Date parsing (unchanged) ──────────────────────────────
+  if (model.listStatus.contains(PLACED)) {
+    pDate = model.listDate![model.listStatus.indexOf(PLACED)];
+    final parts = pDate.split(" ");
+    pDate = "${parts[0]}\n${parts[1]}";
   }
+  if (model.listStatus.contains(PROCESSED)) {
+    prDate = model.listDate![model.listStatus.indexOf(PROCESSED)];
+    final parts = prDate.split(" ");
+    prDate = "${parts[0]}\n${parts[1]}";
+  }
+  if (widget.model!.isLocalPickUp != "1") {
+    if (model.listStatus.contains(SHIPED)) {
+      sDate = model.listDate![model.listStatus.indexOf(SHIPED)];
+      final parts = sDate.split(" ");
+      sDate = "${parts[0]}\n${parts[1]}";
+    }
+  } else {
+    if (model.listStatus.contains(READY_TO_PICKUP)) {
+      sDate = model.listDate![model.listStatus.indexOf(READY_TO_PICKUP)];
+      final parts = sDate.split(" ");
+      sDate = "${parts[0]}\n${parts[1]}";
+    }
+  }
+  if (model.listStatus.contains(DELIVERD)) {
+    dDate = model.listDate![model.listStatus.indexOf(DELIVERD)];
+    final parts = dDate.split(" ");
+    dDate = "${parts[0]}\n${parts[1]}";
+  }
+  if (model.listStatus.contains(CANCLED)) {
+    cDate = model.listDate![model.listStatus.indexOf(CANCLED)];
+    final parts = cDate.split(" ");
+    cDate = "${parts[0]}\n${parts[1]}";
+  }
+  if (model.listStatus.contains(RETURNED)) {
+    rDate = model.listDate![model.listStatus.indexOf(RETURNED)];
+    final parts = rDate.split(" ");
+    rDate = "${parts[0]}\n${parts[1]}";
+  }
+
+  _isCancleable = model.isCancleable == "1";
+  _isReturnable  = model.isReturnable == "1";
+  // ────────────────────────────────────────────────────────────
+
+  return PopScope(
+    canPop: _selectedTabIndex == 0,
+    onPopInvokedWithResult: (_, success) {
+      if (success == true && _tabController.index != 0) {
+        _tabController.animateTo(0);
+      }
+    },
+    child: AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor:                Colors.white,
+        statusBarIconBrightness:      Brightness.dark,
+        systemNavigationBarColor:     Colors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        // Paint the scaffold's white background under the bars:
+        extendBodyBehindAppBar: true,
+
+        appBar: getSimpleAppBar(
+          getTranslated(context, "ORDER_DETAIL")!,
+          context,
+        ),
+
+        backgroundColor: Theme.of(context).colorScheme.lightWhite,
+
+        body: _isNetworkAvail
+          ? Stack(
+              children: [
+                // Only this content lives inside the SafeArea:
+                SafeArea(
+                  top: true,
+                  bottom: true,
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: getSubHeadingsTabBar(),
+                      ),
+                      Expanded(
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: [
+                            getOrderDetails(model),
+                            SingleChildScrollView(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: getSingleProduct(model, PROCESSED),
+                            ),
+                            SingleChildScrollView(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: getSingleProduct(model, SHIPED),
+                            ),
+                            SingleChildScrollView(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: getSingleProduct(model, DELIVERD),
+                            ),
+                            SingleChildScrollView(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: getSingleProduct(model, CANCLED),
+                            ),
+                            SingleChildScrollView(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: getSingleProduct(model, RETURNED),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Your existing loading overlay:
+                showCircularProgress(
+                  context,
+                  _isProgress,
+                  Theme.of(context).colorScheme.primarytheme,
+                ),
+              ],
+            )
+          : noInternet(context),
+      ),
+    ),
+  );
+}
+
+
 /* ───────────────── Delivery-proof images ───────────────── */
 Widget deliveryProofImages(OrderModel model) {
   if (!model.listStatus.contains(DELIVERD) || model.deliveryProof.isEmpty) {
@@ -1866,8 +1872,8 @@ Widget deliveryProofImages(OrderModel model) {
                 }
 
                 final targetFileName = 'Invoice_${widget.model!.id}';
-                var generatedPdfFile;
-                var filePath;
+                File generatedPdfFile;
+                String filePath;
 
                 try {
                   generatedPdfFile = await FlutterHtmlToPdf.convertFromHtmlContent(

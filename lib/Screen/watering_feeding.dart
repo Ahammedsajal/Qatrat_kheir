@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:customer/ui/widgets/AppBtn.dart';
-import '../ui/widgets/AppBarWidget.dart'; // This file should contain getSimpleAppBar.
-import '../Helper/Constant.dart';
-import 'package:customer/Helper/String.dart';
-import '../Model/Section_Model.dart';
-import '../ui/styles/DesignConfig.dart';
+// This file should contain getSimpleAppBar.
 import '../Helper/Session.dart';
 import '../ui/widgets/SimpleAppBar.dart';
 
@@ -12,8 +7,7 @@ class WateringFeeding extends StatelessWidget {
   final bool fromSeller;
   final String? name;
 
-  const WateringFeeding({Key? key, this.fromSeller = false, this.name})
-      : super(key: key);
+  const WateringFeeding({super.key, this.fromSeller = false, this.name});
 
   @override
   Widget build(BuildContext context) {

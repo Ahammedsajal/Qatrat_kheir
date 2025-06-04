@@ -2,8 +2,7 @@
   import 'dart:convert';
   import 'dart:io';
   import 'package:collection/src/iterable_extensions.dart';
-  import 'package:webview_flutter/webview_flutter.dart';
-import 'dart:convert';
+import 'package:flutter/services.dart';
   // At the top of Cart.dart
 import 'package:customer/Screen/Payment.dart' hide isTimeSlot;
 import 'package:customer/Screen/SkipCashWebView.dart';
@@ -12,26 +11,20 @@ import 'package:logging/logging.dart';
   import 'package:customer/Helper/Session.dart';
   import 'package:customer/Helper/SqliteData.dart';
   import 'package:customer/Helper/cart_var.dart';
-  import '../../Helper/AuthUtils.dart';
   import 'package:customer/Provider/CartProvider.dart';
   import 'package:customer/Provider/SettingProvider.dart';
   import 'package:customer/Provider/UserProvider.dart';
-  import 'package:customer/Screen/Dashboard.dart';
   import 'package:customer/app/routes.dart';
   import 'package:file_picker/file_picker.dart';
   import 'package:flutter/cupertino.dart';
-  import 'package:flutter/foundation.dart';
   import 'package:flutter/material.dart';
   import 'package:flutter_svg/flutter_svg.dart';
   import 'package:flutter_svg/svg.dart';
-  import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
   import 'package:http/http.dart' as http;
   import 'package:http_parser/http_parser.dart';
-  import '../Order_Success.dart';
   import 'package:mime/mime.dart';
   import 'package:my_fatoorah/my_fatoorah.dart';
   import 'package:provider/provider.dart';
-  import 'package:url_launcher/url_launcher.dart';
   import '../../Helper/ApiBaseHelper.dart';
   import '../../Helper/Color.dart';
   import '../../Helper/Constant.dart';
@@ -48,12 +41,10 @@ import 'package:customer/Helper/String.dart' hide currencySymbol;
   import '../../ui/widgets/SimBtn.dart';
   import '../../ui/widgets/SimpleAppBar.dart';
   import '../../ui/widgets/Stripe_Service.dart';
-  import '../Add_Address.dart';
   import '../HomePage.dart';
   import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../utils/Hive/hive_utils.dart';
   import '../PaypalWebviewActivity.dart';
-  import '../instamojo_webview.dart';
   import '../qatar_mosques.dart';
   import '../midtransWebView.dart';
   import '../../Provider/MosqueProvider.dart';
@@ -75,7 +66,7 @@ import '../../utils/Hive/hive_utils.dart';
       required String orderID,
     }) async {
       final parameter = {ORDER_ID: orderID, STATUS: status};
-      final Logger _log = Logger('Cart.dart');
+      final Logger log = Logger('Cart.dart');
       final result = await ApiBaseHelper().postAPICall(updateOrderApi, parameter);
       return {'error': result['error'], 'message': result['message']};
     }
@@ -136,10 +127,8 @@ import '../../utils/Hive/hive_utils.dart';
       }
       
      // Initialize mobile controller with the current mobile number
-    if (context.read<UserProvider>().mobile != null) {
-      mobileController.text = context.read<UserProvider>().mobile!;
-    }
-      buttonController = AnimationController(
+    mobileController.text = context.read<UserProvider>().mobile;
+        buttonController = AnimationController(
         duration: const Duration(milliseconds: 2000),
         vsync: this,
       );
@@ -333,13 +322,13 @@ import '../../utils/Hive/hive_utils.dart';
     Widget build(BuildContext context) {
       deviceHeight = MediaQuery.of(context).size.height;
       deviceWidth = MediaQuery.of(context).size.width;
-      return SafeArea(
-        bottom: Platform.isAndroid ? false : true,
-        child: Scaffold(
+      return Scaffold(
+        
           appBar: widget.fromBottom
               ? null
               : getSimpleAppBar(getTranslated(context, 'CART')!, context),
-          body: Consumer<UserProvider>(
+          body: SafeArea(
+         child: Consumer<UserProvider>(
             builder: (context, data, child) {
               return _isNetworkAvailable
                   ? context.read<UserProvider>().userId != ""
@@ -471,7 +460,9 @@ import '../../utils/Hive/hive_utils.dart';
           i < cartList[index].productList![0].prVarientList!.length;
           i++) {
         if (cartList[index].varientId ==
-            cartList[index].productList![0].prVarientList![i].id) selectedPos = i;
+            cartList[index].productList![0].prVarientList![i].id) {
+          selectedPos = i;
+        }
       }
       String? offPer;
       double price = double.parse(
@@ -1322,7 +1313,9 @@ import '../../utils/Hive/hive_utils.dart';
           i < cartList[index].productList![0].prVarientList!.length;
           i++) {
         if (cartList[index].varientId ==
-            cartList[index].productList![0].prVarientList![i].id) selectedPos = i;
+            cartList[index].productList![0].prVarientList![i].id) {
+          selectedPos = i;
+        }
       }
       double price = double.parse(
         cartList[index].productList![0].prVarientList![selectedPos].disPrice!,
@@ -3808,266 +3801,246 @@ buildConvertedPrice(
       });
     }
 
-    checkout() {
-      final List<SectionModel> cartList = context.read<CartProvider>().cartList;
-      print("cartList*****${cartList.length}");
-      deviceHeight = MediaQuery.of(context).size.height;
-      deviceWidth = MediaQuery.of(context).size.width;
-      print("checkdeliverablr--->$deliverable");
-      if (isStorePickUp == "false" &&
-          addressList.isNotEmpty &&
-          !deliverable &&
-          cartList[0].productList![0].productType != 'digital_product') {
-        checkDeliverable(2);
-      }
-      return showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(10),
-            topRight: Radius.circular(10),
-          ),
-        ),
-        builder: (builder) {
-          print("isDelivarable=====>$deliverable");
-          return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              checkoutState = setState;
-              return SafeArea(
-                bottom: Platform.isAndroid ? false : true,
-                child: Container(
-                  constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.8,
-                  ),
-                  child: Scaffold(
-                    resizeToAvoidBottomInset: false,
-                    body: _isNetworkAvailable
-                        ? cartList.isEmpty
-                            ? cartEmpty(context)
-                            : _isLoading
-                                ? shimmer(context)
-                                : Column(
-                                    children: [
-                                      Expanded(
-                                        child: Stack(
-                                          children: <Widget>[
-                                            SingleChildScrollView(
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(10.0),
-                                                child: Column(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-                                                    if (cartList[0]
-                                                            .productList![0]
-                                                            .productType !=
-                                                        'digital_product')
-                                                      IS_LOCAL_PICKUP != "1" ||
-                                                              isStorePickUp !=
-                                                                  "true"
-                                                          ? address()
-                                                          : const SizedBox
-                                                              .shrink()
-                                                    else
-                                                      const SizedBox.shrink(),
-                                                    attachPrescriptionImages(
-                                                      cartList,
-                                                    ),
-                                                    payment(),
-                                                    cartItems(cartList),
-                                                    orderSummary(cartList),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            Selector<CartProvider, bool>(
-                                              builder: (context, data, child) {
-                                                return showCircularProgress(
-                                                  context,
-                                                  data,
-                                                  Theme.of(context)
-                                                      .colorScheme
-                                                      .primarytheme,
-                                                );
-                                              },
-                                              selector: (_, provider) =>
-                                                  provider.isProgress,
+   checkout() {
+  final List<SectionModel> cartList = context.read<CartProvider>().cartList;
+  print("cartList*****${cartList.length}");
+  deviceHeight = MediaQuery.of(context).size.height;
+  deviceWidth = MediaQuery.of(context).size.width;
+
+  if (isStorePickUp == "false" &&
+      addressList.isNotEmpty &&
+      !deliverable &&
+      cartList[0].productList![0].productType != 'digital_product') {
+    checkDeliverable(2);
+  }
+
+  return showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(10),
+        topRight: Radius.circular(10),
+      ),
+    ),
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          checkoutState = setState;
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: SafeArea(
+              bottom: Platform.isAndroid ? false : true,
+              child: Container(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.8,
+                ),
+                child: Scaffold(
+                  resizeToAvoidBottomInset: false,
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  body: _isNetworkAvailable
+                      ? cartList.isEmpty
+                          ? cartEmpty(context)
+                          : _isLoading
+                              ? shimmer(context)
+                              : Column(
+                                  children: [
+                                    Expanded(
+                                      child: SingleChildScrollView(
+                                        keyboardDismissBehavior:
+                                            ScrollViewKeyboardDismissBehavior.onDrag,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(10.0),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              if (cartList[0].productList![0].productType !=
+                                                  'digital_product')
+                                                (IS_LOCAL_PICKUP != "1" ||
+                                                        isStorePickUp != "true")
+                                                    ? address()
+                                                    : const SizedBox.shrink()
+                                              else
+                                                const SizedBox.shrink(),
+                                              attachPrescriptionImages(cartList),
+                                              payment(),
+                                              cartItems(cartList),
+                                              orderSummary(cartList),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(bottom: 20),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).colorScheme.white,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black12,
+                                              offset: Offset(0, -1),
+                                              blurRadius: 4,
                                             ),
                                           ],
                                         ),
-                                      ),
-                                      Padding(
-    padding: const EdgeInsets.only(bottom: 20.0), 
-                                  child:   Container(
-                                        color:
-                                            Theme.of(context).colorScheme.white,
                                         child: Row(
-                                          children: <Widget>[
+                                          children: [
                                             Padding(
-                                              padding: const EdgeInsetsDirectional
-                                                  .only(start: 15.0),
+                                              padding: const EdgeInsetsDirectional.only(start: 15),
                                               child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
                                                   buildTotalPriceWidget(context),
-
-                                                  Text(
-                                                    "${cartList.length} Items",
-                                                  ),
+                                                  Text("${cartList.length} Items"),
                                                 ],
                                               ),
                                             ),
                                             const Spacer(),
-                                            
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                  right: 10.0,
-                                                ),
-                                                child: SimBtn(
-                                                  height: 35,
-                                                  width: 0.4,
-                                                  title: getTranslated(
-                                                    context,
-                                                    'PLACE_ORDER',
-                                                  ),onBtnSelected: () async {
-  // Reset the place order flag
-  checkoutState?.call(() {
-    _placeOrder = false;
-  });
+                                            Padding(
+                                              padding: const EdgeInsets.only(right: 10),
+                                              child: SimBtn(
+                                                height: 35,
+                                                width: 0.4,
+                                                title: getTranslated(context, 'PLACE_ORDER'),
+                                                onBtnSelected: () async {
+                                                  checkoutState?.call(() {
+                                                    _placeOrder = false;
+                                                  });
 
-  // Validate payment method selection
-  if (paymentMethod == null || paymentMethod!.isEmpty) {
-    msg = getTranslated(context, 'payWarning');
-    Navigator.pushNamed(
-      context,
-      Routers.paymentScreen,
-      arguments: {
-        "update": updateCheckout,
-        "msg": msg,
-      },
-    ).then((value) async {
-      if (cartList[0].productList![0].productType != 'digital_product' &&
-          isStorePickUp == "false" &&
-          !deliverable) {
-        await checkDeliverable(2, showErrorMessage: false);
-      }
-      checkoutState?.call(() {
-        _placeOrder = true;
-      });
-    });
-    return;
-  }
+                                                  if (paymentMethod == null || paymentMethod!.isEmpty) {
+                                                    msg = getTranslated(context, 'payWarning');
+                                                    Navigator.pushNamed(
+                                                      context,
+                                                      Routers.paymentScreen,
+                                                      arguments: {
+                                                        "update": updateCheckout,
+                                                        "msg": msg,
+                                                      },
+                                                    ).then((value) async {
+                                                      if (cartList[0].productList![0].productType !=
+                                                              'digital_product' &&
+                                                          isStorePickUp == "false" &&
+                                                          !deliverable) {
+                                                        await checkDeliverable(2, showErrorMessage: false);
+                                                      }
+                                                      checkoutState?.call(() {
+                                                        _placeOrder = true;
+                                                      });
+                                                    });
+                                                    return;
+                                                  }
 
-  // Validate delivery date selection
-  if (cartList[0].productList![0].productType != 'digital_product' &&
-      isTimeSlot! &&
-      (isLocalDelCharge == null || isLocalDelCharge!) &&
-      int.parse(allowDay!) > 0 &&
-      (selDate == null || selDate!.isEmpty) &&
-      IS_LOCAL_ON != '0') {
-    msg = getTranslated(context, 'dateWarning');
-    Navigator.pushNamed(
-      context,
-      Routers.paymentScreen,
-      arguments: {
-        "update": updateCheckout,
-        "msg": msg,
-      },
-    ).then((value) async {
-      if (cartList[0].productList![0].productType != 'digital_product' &&
-          isStorePickUp == "false" &&
-          !deliverable) {
-        await checkDeliverable(2, showErrorMessage: false);
-      }
-      checkoutState?.call(() {
-        _placeOrder = true;
-      });
-    });
-    return;
-  }
+                                                  if (cartList[0].productList![0].productType !=
+                                                          'digital_product' &&
+                                                      isTimeSlot! &&
+                                                      (isLocalDelCharge == null || isLocalDelCharge!) &&
+                                                      int.parse(allowDay!) > 0 &&
+                                                      (selDate == null || selDate!.isEmpty) &&
+                                                      IS_LOCAL_ON != '0') {
+                                                    msg = getTranslated(context, 'dateWarning');
+                                                    Navigator.pushNamed(
+                                                      context,
+                                                      Routers.paymentScreen,
+                                                      arguments: {
+                                                        "update": updateCheckout,
+                                                        "msg": msg,
+                                                      },
+                                                    ).then((value) async {
+                                                      if (cartList[0].productList![0].productType !=
+                                                              'digital_product' &&
+                                                          isStorePickUp == "false" &&
+                                                          !deliverable) {
+                                                        await checkDeliverable(2, showErrorMessage: false);
+                                                      }
+                                                      checkoutState?.call(() {
+                                                        _placeOrder = true;
+                                                      });
+                                                    });
+                                                    return;
+                                                  }
 
-  // Validate delivery time selection
-  if (cartList[0].productList![0].productType != 'digital_product' &&
-      isTimeSlot! &&
-      (isLocalDelCharge == null || isLocalDelCharge!) &&
-      timeSlotList.isNotEmpty &&
-      (selTime == null || selTime!.isEmpty) &&
-      IS_LOCAL_ON != '0') {
-    msg = getTranslated(context, 'timeWarning');
-    Navigator.pushNamed(
-      context,
-      Routers.paymentScreen,
-      arguments: {
-        "update": updateCheckout,
-        "msg": msg,
-      },
-    ).then((value) async {
-      if (cartList[0].productList![0].productType != 'digital_product' &&
-          isStorePickUp == "false" &&
-          !deliverable) {
-        await checkDeliverable(2, showErrorMessage: false);
-      }
-      checkoutState?.call(() {
-        _placeOrder = true;
-      });
-    });
-    return;
-  }
+                                                  if (cartList[0].productList![0].productType !=
+                                                          'digital_product' &&
+                                                      isTimeSlot! &&
+                                                      (isLocalDelCharge == null || isLocalDelCharge!) &&
+                                                      timeSlotList.isNotEmpty &&
+                                                      (selTime == null || selTime!.isEmpty) &&
+                                                      IS_LOCAL_ON != '0') {
+                                                    msg = getTranslated(context, 'timeWarning');
+                                                    Navigator.pushNamed(
+                                                      context,
+                                                      Routers.paymentScreen,
+                                                      arguments: {
+                                                        "update": updateCheckout,
+                                                        "msg": msg,
+                                                      },
+                                                    ).then((value) async {
+                                                      if (cartList[0].productList![0].productType !=
+                                                              'digital_product' &&
+                                                          isStorePickUp == "false" &&
+                                                          !deliverable) {
+                                                        await checkDeliverable(2, showErrorMessage: false);
+                                                      }
+                                                      checkoutState?.call(() {
+                                                        _placeOrder = true;
+                                                      });
+                                                    });
+                                                    return;
+                                                  }
 
-  // Validate minimum cart amount
-  if (double.parse(MIN_ALLOW_CART_AMT!) > originalPrice) {
-    setSnackbar(getTranslated(context, 'MIN_CART_AMT')!, context);
-    return;
-  }
+                                                  if (double.parse(MIN_ALLOW_CART_AMT!) > originalPrice) {
+                                                    setSnackbar(getTranslated(context, 'MIN_CART_AMT')!, context);
+                                                    return;
+                                                  }
 
-  // Validate deliverability
-  if (cartList[0].productList![0].productType != 'digital_product' &&
-      isStorePickUp == "false" &&
-      !deliverable) {
-    checkDeliverable(1);
-    return;
-  }
+                                                  if (cartList[0].productList![0].productType !=
+                                                          'digital_product' &&
+                                                      isStorePickUp == "false" &&
+                                                      !deliverable) {
+                                                    checkDeliverable(1);
+                                                    return;
+                                                  }
 
-  // Proceed with order confirmation
-  if (confDia) {
-    if (!context.read<CartProvider>().isProgress) {
-      confirmDialog(cartList);
-      setState(() {
-        confDia = false;
-      });
-    }
-  }
-}
-),
+                                                 if (confDia) {
+                                                    if (!context.read<CartProvider>().isProgress) {
+                                                      confirmDialog(cartList);
+                                                      setState(() {
+                                                        confDia = false;
+                                                      });
+                                                    }
+                                                  } 
+                                                },
                                               ),
+                                            ),
                                           ],
                                         ),
                                       ),
-                                )],
-                                  )
-                        : noInternet(
-                            context,
-                            buttonController: buttonController,
-                            buttonSqueezeanimation: buttonSqueezeanimation,
-                            onButtonClicked: (internetAvailable) {
-                              _isNetworkAvailable = internetAvailable;
-                              callApi();
-                              setState(() {});
-                            },
-                            onNetworkNavigationWidget: super.widget,
-                          ),
-                  ),
+                                    ),
+                                  ],
+                                )
+                      : noInternet(
+                          context,
+                          buttonController: buttonController,
+                          buttonSqueezeanimation: buttonSqueezeanimation,
+                          onButtonClicked: (internetAvailable) {
+                            _isNetworkAvailable = internetAvailable;
+                            callApi();
+                            setState(() {});
+                          },
+                          onNetworkNavigationWidget: super.widget,
+                        ),
                 ),
-              );
-            },
+              ),
+            ),
           );
         },
       );
-    }
+    },
+  );
+}
 
-    
 Widget buildTotalPriceWidget(BuildContext context) {
   double finalPrice = totalPrice;
   if (usedBalance == 0 && isStorePickUp == "false") {
@@ -4206,6 +4179,13 @@ Future<void> placeOrder(String? tranId) async {
             : totalPrice;
     // Generate an order ID placeholder. Replace with an actual generated order ID if available.
     final String orderIdForPayment = '';
+    print('MOBILE CONTROLLER VALUE: ${mobileController.text.trim()}');
+
+
+    final String checkoutMobile = mobileController.text.trim().isNotEmpty
+    ? mobileController.text.trim()
+     : (userProvider.mobile ?? '');
+
     await initiateSkipCashPayment(
       context,
       orderIdForPayment,
@@ -4217,7 +4197,9 @@ Future<void> placeOrder(String? tranId) async {
       selDate: selDate,
       selTime: selTime,
       baseUrl: baseUrl,
-      placeOrder: placeOrder, // Pass this callback to be called upon completion.
+      placeOrder: placeOrder,
+      accountPhone: userProvider.mobile ?? '97433277077',
+  checkoutMobile: checkoutMobile, // Pass this callback to be called upon completion.
     );
     return; // Stop further order placement until SkipCash payment completes.
   }
@@ -4227,7 +4209,8 @@ Future<void> placeOrder(String? tranId) async {
   // Normal order placement for other payment methods
   final request = http.MultipartRequest("POST", placeOrderApi);
   request.headers.addAll(headers);
-  request.fields[MOBILE] = mobileController.text;
+request.fields['mobile'] = mobileController.text.trim();     // User's checkout entry
+request.fields['account_mobile'] = userProvider.mobile ?? ''; // Saved profile/account
   request.fields[USER_ID] = userProvider.userId;
   request.fields[PRODUCT_VARIENT_ID] = varientId!;
   request.fields[QUANTITY] = quantity!;
@@ -4248,7 +4231,7 @@ Future<void> placeOrder(String? tranId) async {
   }
   
   final selectedMosque = context.read<MosqueProvider>().selectedMosque;
-  request.fields[ADD_ID] = selectedMosque != null ? selectedMosque.id! : "999";
+  request.fields[ADD_ID] = selectedMosque != null ? selectedMosque.id : "999";
   if (IS_LOCAL_PICKUP == "1") {
     request.fields[LOCAL_PICKUP] = isStorePickUp == "true" ? "1" : "0";
   }
@@ -4325,22 +4308,23 @@ Future<void> initiateSkipCashPayment(
   required String isStorePickUp,
   required String? selDate,
   required String? selTime,
+    required String accountPhone,
+  required String checkoutMobile,
   required String baseUrl,
   required Future<void> Function(String?) placeOrder,
 }) async {
-  final Logger _log = Logger('SkipCashPayment');
-  _log.info('START: initiateSkipCashPayment called with orderId: $orderId, amount: $amount');
-  _log.info('Parameters: totalPrice=$totalPrice, deliveryCharge=$deliveryCharge, usedBalance=$usedBalance, isStorePickUp=$isStorePickUp, selDate=$selDate, selTime=$selTime, baseUrl=$baseUrl');
+  final Logger log = Logger('SkipCashPayment');
+  log.info('START: initiateSkipCashPayment called with orderId: $orderId, amount: $amount');
 
   if (!context.mounted) {
-    _log.severe('Context is not mounted at start, cannot proceed');
+    log.severe('Context not mounted, aborting.');
     return;
   }
 
   final cartProvider = context.read<CartProvider>();
   final userProvider = context.read<UserProvider>();
-
   final String? jwtToken = HiveUtils.getJWT();
+
   if (jwtToken == null || jwtToken.isEmpty) {
     setSnackbar('Please log in again to proceed with payment', context);
     Navigator.pushReplacementNamed(context, '/login');
@@ -4352,56 +4336,72 @@ Future<void> initiateSkipCashPayment(
     return;
   }
 
-  final cartItem = cartProvider.cartList[0];
+  // Build comma-separated lists of variants & quantities:
+  final variantIds = cartProvider.cartList.map((e) => e.varientId).join(',');
+  final quantities = cartProvider.cartList.map((e) => e.qty).join(',');
 
-  double finalAmount = usedBalance > 0
+  final double finalAmount = usedBalance > 0
       ? totalPrice
-      : isStorePickUp == "false"
-          ? (totalPrice + deliveryCharge)
-          : totalPrice;
+      : (isStorePickUp == "false" ? totalPrice + deliveryCharge : totalPrice);
 
   if (finalAmount <= 0) {
     setSnackbar('Invalid payment amount', context);
     return;
   }
 
-  final nameParts = userProvider.userName.isNotEmpty
-      ? userProvider.userName.split(' ')
-      : ['John', 'Doe'];
-  final firstName = nameParts[0];
-  final lastName = nameParts.length > 1 ? nameParts[1] : 'Doe';
-  final phone = userProvider.mobile.isNotEmpty ? userProvider.mobile : '97412345678';
-  final email = userProvider.email.isNotEmpty ? userProvider.email : 'user@example.com';
+  final nameParts = userProvider.userName.split(' ');
+  final firstName = nameParts.first;
+  final lastName = nameParts.length > 1 ? nameParts[1] : '';
+
+  
+  final String email = userProvider.email.isNotEmpty
+      ? userProvider.email
+      : '';
+
+  // Make sure you have your selected mosque here:
+  final selectedMosque = context.read<MosqueProvider>().selectedMosque;
 
   final cartData = {
-    'total': totalPrice,
-    'delivery_charge': deliveryCharge,
-    'product_variant_id': cartItem.varientId,
-    'quantity': cartItem.qty,
-    'user_id': userProvider.userId,
-'address_id': selectedMosque?.id ?? '999',
-    'local_pickup': isStorePickUp == "true" ? '1' : '0',
-    'mosque_name': 'Default Mosque',
-    'delivery_date': selDate,
-    'delivery_time': selTime,
+    'total':              totalPrice,
+    'delivery_charge':    deliveryCharge,
+    'product_variant_id': variantIds,
+    'quantity':           quantities,
+    'user_id':            userProvider.userId,
+    'address_id':         selectedMosque?.id ?? '999',
+    'local_pickup':       isStorePickUp == "true" ? '1' : '0',
+    'mosque_name':        selectedMosque?.name ?? '',
+    'delivery_date':      selDate,
+    'delivery_time':      selTime,
   };
 
   final body = {
-    'amount': finalAmount.toStringAsFixed(2),
-    'order_id': orderId,
+    'amount':    finalAmount.toStringAsFixed(2),
+    'order_id':  orderId,
     'device_os': Platform.isAndroid ? 'android' : 'ios',
-    'fcm_id': '',
-    'cart_data': cartData, // ✅ Send as nested object
-
+    'fcm_id':    '',
+    'cart_data': cartData,
     'first_name': firstName,
-    'last_name': lastName,
-    'phone': phone,
-    'email': email,
+    'last_name':  lastName,
+    'account_mobile': accountPhone,
+  'phone': checkoutMobile.isNotEmpty
+      ? checkoutMobile
+      : (accountPhone.isNotEmpty ? accountPhone : '97433277077'),
+
+    'email':      email,
   };
 
   try {
+    final effectivePhone = checkoutMobile.isNotEmpty
+    ? checkoutMobile
+    : userProvider.mobile ?? '';
+if (effectivePhone.isEmpty) {
+  setSnackbar('Please enter your phone number to proceed with payment', context);
+  return;
+}
+
     cartProvider.setProgress(true);
-    _log.info('Making SkipCash API call to: ${baseUrl}skipcash');
+    log.info('Calling SkipCash API at: ${baseUrl}skipcash');
+
     final response = await http.post(
       Uri.parse('${baseUrl}skipcash'),
       headers: {
@@ -4412,48 +4412,40 @@ Future<void> initiateSkipCashPayment(
     );
 
     final data = jsonDecode(response.body);
-    _log.info('SkipCash Payment API Response: $data');
+    log.info('SkipCash response: $data');
 
-    if (response.statusCode == 200 &&
-        data['error'] == false &&
-        data['resultObj'] != null) {
+    if (response.statusCode == 200 && data['error'] == false && data['resultObj'] != null) {
       final result = data['resultObj'];
-      _log.info('Result object: $result');
-
       if (result['status'] == 'paid') {
         await placeOrder(result['transactionId'] ?? 'skipcash-$orderId');
       } else if (result['status'] == 'new' && result['payUrl'] != null) {
-        final route = MaterialPageRoute(
-          builder: (context) => SkipCashWebView(
-            payUrl: result['payUrl'],
-            paymentId: result['transactionId'], // required field for verification
-            onSuccess: (transactionId) async {
-              await placeOrder(transactionId); // place order only after verification success
-            },
-            onError: (error) {
-              setSnackbar(error, context);
-              deleteOrders(orderId); // Optional: clear abandoned order
-              if (context.mounted) Navigator.pop(context);
-            },
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => SkipCashWebView(
+              payUrl: result['payUrl'],
+              paymentId: result['transactionId'],
+              onSuccess: (txId) => placeOrder(txId),
+              onError: (err) {
+                setSnackbar(err, context);
+                deleteOrders(orderId);
+                if (context.mounted) Navigator.pop(context);
+              },
+            ),
           ),
         );
-        _log.info('Navigating to SkipCashWebView with payUrl: ${result['payUrl']}');
-        await Navigator.push(context, route);
       } else {
         setSnackbar('SkipCash payment not completed', context);
-        return;
       }
     } else {
       setSnackbar(data['message'] ?? 'SkipCash payment failed', context);
-      return;
     }
-  } catch (e, stackTrace) {
-    _log.severe('SkipCash Exception: $e', e, stackTrace);
+  } catch (e, st) {
+    log.severe('SkipCash exception', e, st);
     setSnackbar('Something went wrong: $e', context);
-    return;
   } finally {
     cartProvider.setProgress(false);
-    _log.info('END: initiateSkipCashPayment');
+    log.info('END: initiateSkipCashPayment');
   }
 }
 
@@ -5039,8 +5031,8 @@ Widget address() {
                     children: [
                       Expanded(
                         child: Text(
-                          selectedMosque.name?.isNotEmpty == true
-                              ? selectedMosque.name!
+                          selectedMosque.name.isNotEmpty == true
+                              ? selectedMosque.name
                               : "Mosque at (${selectedMosque.latitude}, ${selectedMosque.longitude})",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
@@ -5142,26 +5134,48 @@ Widget address() {
             ),
 
           // Mobile Number Input Container added below the address section:
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.white,
-                borderRadius: BorderRadius.circular(5.0),
-                border: Border.all(
-                  color: Colors.grey.shade400,
-                ),
+         TextField(
+            controller: mobileController,
+            keyboardType: Platform.isIOS
+                ? TextInputType.number
+                : TextInputType.phone,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            textInputAction: TextInputAction.done,
+            onEditingComplete: () => FocusScope.of(context).unfocus(),
+            style: TextStyle(
+              fontSize: 15,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white
+                  : Colors.black,
+            ),
+            decoration: InputDecoration(
+              labelText: getTranslated(context, 'MOBILE_NUMBER_LABEL') ?? 'Mobile Number',
+              labelStyle: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white70
+                    : Colors.grey[800],
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              child: TextField(
-                controller: mobileController,
-                keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: getTranslated(context, 'ENTER_MOBILE_NUMBER') ?? 'Enter mobile number',
-
-                ),
+              hintText: getTranslated(context, 'ENTER_MOBILE_NUMBER') ?? 'Enter mobile number',
+              hintStyle: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white54
+                    : Colors.grey[500],
               ),
+              prefixIcon: Icon(
+                Icons.phone_android,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.check),
+                onPressed: () {
+                  FocusScope.of(context).unfocus(); // Unfocus manually
+                },
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             ),
           ),
         ],
@@ -5902,7 +5916,7 @@ Widget address() {
       context.read<CartProvider>().setProgress(true);
       final parameter = {
         USER_ID: context.read<UserProvider>().userId,
-        ADD_ID: (selectedMosque?.id?.isNotEmpty == true)
+        ADD_ID: (selectedMosque?.id.isNotEmpty == true)
             ? selectedMosque!.id
             : "999",
       };
@@ -6040,4 +6054,5 @@ Widget address() {
             )
           : const SizedBox.shrink();
     }
+
   }

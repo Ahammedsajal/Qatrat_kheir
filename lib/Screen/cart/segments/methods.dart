@@ -22,12 +22,12 @@ Widget noInternet(BuildContext context,
 
           }
           Future.delayed(const Duration(seconds: 2)).then((_) async {
-            final bool _isNetworkAvail = await isNetworkAvailable();
-            if (_isNetworkAvail) {
+            final bool isNetworkAvail = await isNetworkAvailable();
+            if (isNetworkAvail) {
             } else {
               await buttonController?.reverse();
             }
-            onButtonClicked.call(_isNetworkAvail);
+            onButtonClicked.call(isNetworkAvail);
           });
         },
       ),
@@ -38,8 +38,8 @@ Widget noInternet(BuildContext context,
 Future<void> _getAddress(BuildContext context,
     {required VoidCallback onComplete,
     required Function(bool hasInternet) onInternetState,}) async {
-  final bool _isNetworkAvailable = await isNetworkAvailable();
-  if (_isNetworkAvailable) {
+  final bool hasNetwork = await isNetworkAvailable();
+  if (hasNetwork) {
     onInternetState.call(true);
     try {
       final parameter = {

@@ -1,7 +1,4 @@
-import 'package:customer/Helper/ApiBaseHelper.dart';
-import 'package:customer/Helper/String.dart';
 import 'package:customer/Model/Section_Model.dart';
-import 'package:customer/ui/widgets/ApiException.dart';
 import 'package:flutter/material.dart';
 
 class CartProvider extends ChangeNotifier {

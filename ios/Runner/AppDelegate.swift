@@ -1,7 +1,7 @@
 import UIKit
 import Flutter
 import FirebaseCore
-import GoogleSignIn
+import GoogleSignIn          // keep; needed for silent-sign-in, etc.
 import flutter_downloader
 
 @main
@@ -12,26 +12,17 @@ import flutter_downloader
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
 
-    // Firebase initialization
-      FirebaseApp.configure()
+    // Initialize Firebase
+    FirebaseApp.configure()
 
-
-    // Register plugins
+    // Register Flutter plugins
     GeneratedPluginRegistrant.register(with: self)
 
-    // Register FlutterDownloader plugin background isolate
+    // Register FlutterDownloader background isolate
     FlutterDownloaderPlugin.setPluginRegistrantCallback(registerPlugins)
 
+    // Call super so Flutter can finish its own setup
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
-  }
-
-  // Handle Google Sign-In URL redirect
-  override func application(
-    _ app: UIApplication,
-    open url: URL,
-    options: [UIApplication.OpenURLOptionsKey: Any] = [:]
-  ) -> Bool {
-    return GIDSignIn.sharedInstance.handle(url)
   }
 }
 

@@ -1543,7 +1543,9 @@ class StateSection extends State<SaleSectionScreen>
           setState(() {
             isLoadingmore = true;
             if (widget.section_model!.offset! <
-                widget.section_model!.totalItem!) getSection("0");
+                widget.section_model!.totalItem!) {
+              getSection("0");
+            }
           });
         }
       }

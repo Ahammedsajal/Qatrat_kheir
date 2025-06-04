@@ -11,7 +11,6 @@ import '../ui/widgets/AppBtn.dart';
 import '../ui/widgets/SimpleAppBar.dart';
 import '../utils/blured_router.dart';
 import 'HomePage.dart';
-import '../app/api_language.dart';
 
 class AboutUs extends StatefulWidget {
   final String? title;

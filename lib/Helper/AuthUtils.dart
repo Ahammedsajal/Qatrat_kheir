@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:customer/Provider/UserProvider.dart';
 import 'package:customer/utils/Hive/hive_utils.dart'; // Adjust if path differs
-import 'package:customer/utils/Hive/hive_keys.dart'; // Adjust if path differs
+// Adjust if path differs
 
 class AuthUtils {
   static final Logger _log = Logger('AuthUtils');

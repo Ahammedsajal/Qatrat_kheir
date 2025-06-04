@@ -1,6 +1,5 @@
 import 'package:customer/Helper/String.dart';
 import 'package:customer/Model/User.dart';
-import 'package:customer/Model/MosqueModel.dart';
 
 class SectionModel {
   String? id;

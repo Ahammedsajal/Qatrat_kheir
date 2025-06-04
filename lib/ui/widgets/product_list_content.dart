@@ -23,7 +23,6 @@ import 'package:customer/Helper/String.dart' hide currencySymbol;
 import 'package:customer/app/curreny_converter.dart';
 import '../../Model/Section_Model.dart';
 import '../styles/DesignConfig.dart';
-import '../widgets/AppBarWidget.dart';
 import '../../utils/blured_router.dart';
 import '../../Screen/HomePage.dart';
 import '../../Screen/Search.dart';

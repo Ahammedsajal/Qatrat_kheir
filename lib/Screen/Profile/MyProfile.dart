@@ -15,7 +15,7 @@ import 'package:customer/Screen/Faqs.dart';
 import 'package:customer/Screen/HomePage.dart';
 import 'package:customer/Screen/Privacy_Policy.dart';
 import 'package:customer/Screen/Profile/widget/editProfileBottomSheet.dart';
-import 'package:customer/Screen/ReferEarn.dart';
+import 'package:customer/app/curreny_converter.dart';
 import 'package:customer/app/languages.dart';
 import 'package:customer/app/routes.dart';
 import '../about_us.dart';
@@ -31,7 +31,6 @@ import 'package:http_parser/http_parser.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:mime/mime.dart';
 import 'package:provider/provider.dart';
-import '../PrivacyScreen.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../Helper/Constant.dart';
@@ -238,7 +237,7 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
                                         color: Theme.of(context)
                                             .colorScheme
                                             .primarytheme,
-                                        decoration: TextDecoration.underline,
+                                        
                                       ),),
                               onTap: () {
                                 Navigator.pushNamed(
@@ -424,7 +423,14 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
               'assets/images/pro_theme.svg',),
         },
         _getDrawerItem(getTranslated(context, 'CHANGE_LANGUAGE_LBL')!,
+        
             'assets/images/pro_language.svg',),
+
+            _getDrawerItem(
+  getTranslated(context, 'CHANGE_CURRENCY_LBL') ?? 'Currency',
+  'assets/images/cod.svg', // Make a simple icon or reuse any
+),
+
         if (context.read<UserProvider>().userId == "" ||
                 context.read<UserProvider>().loginType != PHONE_TYPE) const SizedBox.shrink() else _getDrawerItem(getTranslated(context, 'CHANGE_PASS_LBL')!,
                 'assets/images/pro_pass.svg',),
@@ -499,7 +505,11 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
                 arguments: {
                   "home": true,
                 },);
-          } else if (title == getTranslated(context, 'CONTACT_LBL')) {
+          }
+          else if (title == getTranslated(context, 'CHANGE_CURRENCY_LBL')) {
+  openChangeCurrencyBottomSheet();
+}
+ else if (title == getTranslated(context, 'CONTACT_LBL')) {
             Navigator.push(
                 context,
                 CupertinoPageRoute(
@@ -589,7 +599,7 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
           } else if (title == getTranslated(context, 'DEL_ACC_LBL')) {
             _showDialog();
           }
-        },
+        },  
       ),
     );
   }
@@ -629,6 +639,80 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
       }
     });
   }
+
+void openChangeCurrencyBottomSheet() {
+  List<String> currencies = ['QAR', 'SAR', 'AED', 'KWT', 'OMN', 'USD'];
+  showModalBottomSheet(
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(40.0),
+        topRight: Radius.circular(40.0),
+      ),
+    ),
+    isScrollControlled: true,
+    context: context,
+    builder: (context) {
+      String selected = context.read<CurrencyProvider>().selectedCurrency;
+      return Wrap(
+        children: [
+          Padding(
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,),
+            child: Column(
+              children: [
+                bottomSheetHandle(context),
+                bottomsheetLabel("CHOOSE_CURRENCY_LBL", context),
+                ...currencies.map((currency) {
+                  bool isSelected = currency == selected;
+                  return InkWell(
+                    onTap: () {
+                      context.read<CurrencyProvider>().changeCurrency(currency);
+                      Navigator.pop(context);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12.0, horizontal: 20.0),
+                      child: Row(
+                        children: [
+                          Container(
+                            height: 25,
+                            width: 25,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isSelected
+                                  ? Theme.of(context).colorScheme.primarytheme
+                                  : Theme.of(context).colorScheme.white,
+                              border: Border.all(
+                                color: Theme.of(context).colorScheme.primarytheme,
+                              ),
+                            ),
+                            child: isSelected
+                                ? Icon(Icons.check, size: 17, color: Colors.white)
+                                : null,
+                          ),
+                          SizedBox(width: 18),
+                          Text(
+                            currency,
+                            style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                                  color: Theme.of(context).colorScheme.lightBlack,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+                SizedBox(height: 10),
+              ],
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
 
   deleteConfirmDailog() {
     int from = 0;

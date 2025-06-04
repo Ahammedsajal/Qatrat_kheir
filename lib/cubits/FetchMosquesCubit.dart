@@ -29,24 +29,16 @@ class FetchMosquesCubit extends Cubit<FetchMosquesState> {
 
   Future<void> fetchMosques({String? userId}) async {
     emit(FetchMosquesInProgress());
-
-    // Fetch userId from session if not provided
     userId ??= getToken();
-final effectiveUserId = userId.isNotEmpty ? userId : "0";
-    
+    final effectiveUserId = userId.isNotEmpty ? userId : "0";
     try {
       final Uri url = Uri.parse("${AppSettings.baseUrl}get_mosques");
       final Map<String, String> parameters = {"user_id": userId};
-
       final response = await apiBaseHelper.postAPICall(url, parameters);
-
-      // Check for API response errors
       if (_hasError(response)) return;
-
       final List<MosqueModel> mosqueList = (response["data"] as List)
           .map((data) => MosqueModel.fromJson(data))
           .toList();
-
       if (mosqueList.isEmpty) {
         emit(FetchMosquesFail("No mosques found."));
       } else {
@@ -57,7 +49,29 @@ final effectiveUserId = userId.isNotEmpty ? userId : "0";
     }
   }
 
-  /// Error checking method to match `FetchFeaturedSectionsCubit`
+  /// NEW: Fetch Most Needed Mosques
+  Future<void> fetchNeededMosques({String? userId}) async {
+    emit(FetchMosquesInProgress());
+    userId ??= getToken();
+    final effectiveUserId = userId.isNotEmpty ? userId : "0";
+    try {
+      final Uri url = Uri.parse("${AppSettings.baseUrl}get_needed_mosques");
+      final Map<String, String> parameters = {"user_id": userId};
+      final response = await apiBaseHelper.postAPICall(url, parameters);
+      if (_hasError(response)) return;
+      final List<MosqueModel> mosqueList = (response["data"] as List)
+          .map((data) => MosqueModel.fromJson(data))
+          .toList();
+      if (mosqueList.isEmpty) {
+        emit(FetchMosquesFail("No needed mosques found."));
+      } else {
+        emit(FetchMosquesSuccess(mosqueList));
+      }
+    } catch (e) {
+      emit(FetchMosquesFail("Failed to fetch needed mosques: ${e.toString()}"));
+    }
+  }
+
   bool _hasError(dynamic response) {
     if (response['error'] == true) {
       emit(FetchMosquesFail(response['message'] ?? "An error occurred."));

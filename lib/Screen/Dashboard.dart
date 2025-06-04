@@ -13,11 +13,11 @@ import 'package:customer/Model/Section_Model.dart';
 import 'package:customer/Model/message.dart';
 import 'package:customer/Provider/HomeProvider.dart';
 import 'package:customer/Provider/UserProvider.dart';
-import 'package:customer/Screen/FlashSale.dart';
 import 'package:customer/Screen/Profile/MyProfile.dart';
 import 'package:customer/Screen/about_us.dart';
 import 'package:customer/Screen/cart/Cart.dart';
 import 'package:customer/cubits/personalConverstationsCubit.dart';
+import 'package:customer/main.dart';
 import 'package:customer/repository/notificationRepository.dart';
 import 'package:customer/utils/blured_router.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
@@ -28,11 +28,10 @@ import 'package:provider/provider.dart';
 import '../Provider/SettingProvider.dart';
 import '../app/routes.dart';
 import '../cubits/fetch_featured_sections_cubit.dart';
+
 import '../ui/styles/DesignConfig.dart';
-import 'All_Category.dart';
 import 'HomePage.dart';
 import 'package:customer/Screen/MyOrder.dart';
-import 'package:customer/Screen/Privacy_Policy.dart';
 import '../app/curreny_converter.dart';
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -322,8 +321,7 @@ Widget build(BuildContext context) {
       }
     }
   }
-
- AppBar _getAppBar(BuildContext context) {
+AppBar _getAppBar(BuildContext context) {
   String? title;
   if (_selBottom == 1) {
     title = getTranslated(context, 'ABOUT_LBL');
@@ -354,96 +352,57 @@ Widget build(BuildContext context) {
             ),
           ),
     actions: <Widget>[
-      // Currency Converter Dropdown wrapped in Builder, SizedBox, and DropdownButtonHideUnderline
-      Builder(
-        builder: (innerContext) {
-          return SizedBox(
-            width: 100, // Constrain the dropdown width to avoid overflow.
-            child: DropdownButtonHideUnderline(
-              child: Consumer<CurrencyProvider>(
-                builder: (innerContext, currencyProvider, child) {
-                  return DropdownButton<String>(
-                    isExpanded: true,
-                    value: currencyProvider.selectedCurrency,
-                    icon: Icon(
-                      Icons.arrow_drop_down,
-                      color: Theme.of(innerContext).colorScheme.primarytheme,
-                    ),
-                    dropdownColor: Theme.of(innerContext).colorScheme.white,
-                    items: <String>['QAR', 'SAR', 'AED', 'KWT', 'OMN', 'USD']
-                        .map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(
-                          value,
-                          style: TextStyle(
-                            color: Theme.of(innerContext).colorScheme.primarytheme,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      if (newValue != null) {
-                        debugPrint("Dropdown onChanged: $newValue");
-                        Provider.of<CurrencyProvider>(innerContext, listen: false)
-                            .changeCurrency(newValue);
-                      }
-                    },
-                  );
-                },
-              ),
-            ),
-          );
-        },
-      ),
-      // Notification Icon
-      IconButton(
-        icon: SvgPicture.asset(
-          "${imagePath}desel_notification.svg",
-          colorFilter: ColorFilter.mode(
-              Theme.of(context).colorScheme.blackInverseInDarkTheme,
-              BlendMode.srcIn),
-        ),
-        onPressed: () {
-          final userProvider = context.read<UserProvider>();
-          if (userProvider.userId != "") {
-            Navigator.pushNamed(
-              context,
-              Routers.notificationListScreen,
-            ).then((value) {
-              if (value != null && value == true) {
-                _pageController.jumpToPage(1);
-              }
-            });
-          } else {
-            Navigator.pushNamed(
-              context,
-              Routers.loginScreen,
-              arguments: {
-                "isPop": true,
-                "classType": Dashboard(key: Dashboard.dashboardScreenKey),
-              },
-            );
+  // LANGUAGE TOGGLE BUTTON (with FutureBuilder)
+  LanguageToggleButton(),
+  // NOTIFICATION ICON
+  IconButton(
+    icon: SvgPicture.asset(
+      "${imagePath}desel_notification.svg",
+      colorFilter: ColorFilter.mode(
+        Theme.of(context).colorScheme.blackInverseInDarkTheme,
+        BlendMode.srcIn),
+    ),
+    onPressed: () {
+      final userProvider = context.read<UserProvider>();
+      if (userProvider.userId != "") {
+        Navigator.pushNamed(
+          context,
+          Routers.notificationListScreen,
+        ).then((value) {
+          if (value != null && value == true) {
+            _pageController.jumpToPage(1);
           }
-        },
-      ),
-      // Favorite Icon
-      IconButton(
-        padding: const EdgeInsets.all(0),
-        icon: SvgPicture.asset(
-          "${imagePath}desel_fav.svg",
-          colorFilter: ColorFilter.mode(
-              Theme.of(context).colorScheme.blackInverseInDarkTheme,
-              BlendMode.srcIn),
-        ),
-        onPressed: () {
-          Navigator.pushNamed(
-            context,
-            Routers.favoriteScreen,
-          );
-        },
-      ),
-    ],
+        });
+      } else {
+        Navigator.pushNamed(
+          context,
+          Routers.loginScreen,
+          arguments: {
+            "isPop": true,
+            "classType": Dashboard(key: Dashboard.dashboardScreenKey),
+          },
+        );
+      }
+    },
+  ),
+  // FAVORITE ICON
+  IconButton(
+    padding: const EdgeInsets.all(0),
+    icon: SvgPicture.asset(
+      "${imagePath}desel_fav.svg",
+      colorFilter: ColorFilter.mode(
+        Theme.of(context).colorScheme.blackInverseInDarkTheme,
+        BlendMode.srcIn),
+    ),
+    onPressed: () {
+      Navigator.pushNamed(
+        context,
+        Routers.favoriteScreen,
+      );
+    },
+  ),
+],
+
     backgroundColor: Theme.of(context).colorScheme.lightWhite,
   );
 }
@@ -655,5 +614,94 @@ Widget build(BuildContext context) {
             ),
           ),
         ),);
+  }
+}
+
+class LanguageToggleButton extends StatelessWidget {
+  const LanguageToggleButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    String langCode = Localizations.localeOf(context).languageCode;
+    bool isEnglish = langCode == 'en';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () {
+          String nextLang = isEnglish ? 'ar' : 'en';
+          MyApp.setLocale(context, Locale(nextLang));
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Theme.of(context).colorScheme.primarytheme.withOpacity(0.07),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.primarytheme,
+              width: 0.6,
+            ),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Row(
+            children: [
+              AnimatedContainer(
+                duration: Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                  color: isEnglish
+                      ? Theme.of(context).colorScheme.primarytheme
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                child: Row(
+                  children: [
+                    Text('🇺🇸', style: TextStyle(fontSize: 14)),
+                    const SizedBox(width: 2),
+                    Text(
+                      'EN',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: isEnglish
+                            ? Colors.white
+                            : Theme.of(context).colorScheme.primarytheme,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 4),
+              AnimatedContainer(
+                duration: Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                  color: !isEnglish
+                      ? Theme.of(context).colorScheme.primarytheme
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                child: Row(
+                  children: [
+                    Text('🇶🇦', style: TextStyle(fontSize: 14)),
+                    const SizedBox(width: 2),
+                    Text(
+                      'ع',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: !isEnglish
+                            ? Colors.white
+                            : Theme.of(context).colorScheme.primarytheme,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

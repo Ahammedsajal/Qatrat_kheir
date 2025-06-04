@@ -65,7 +65,7 @@ class DefaultFirebaseOptions {
     projectId: 'customer-app-cad10',
     storageBucket: 'customer-app-cad10.firebasestorage.app',
     iosClientId:
-        '388298698922-gftnl5f973cm8jufpkaqgu0p3dkamvno.apps.googleusercontent.com',
+        '388298698922-frg9qq2gln7alrmf0nokvf0h0rhoroof.apps.googleusercontent.com',
     iosBundleId: 'com.customersingle.customer',
   );
 

@@ -2,20 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-import '../Helper/String.dart';
 import '../cubits/FetchMosquesCubit.dart';
 import '../Model/MosqueModel.dart';
 import '../Provider/MosqueProvider.dart';
-import '../app/routes.dart';
 import '../Helper/Session.dart';
 import 'MostNeededMosquesFromMap.dart';
 
 class QatarMosques extends StatefulWidget {
   final bool isFromCheckout;
-  const QatarMosques({Key? key, this.isFromCheckout = false}) : super(key: key);
+  const QatarMosques({super.key, this.isFromCheckout = false});
 
   @override
   _QatarMosquesState createState() => _QatarMosquesState();

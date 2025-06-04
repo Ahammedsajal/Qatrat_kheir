@@ -19,21 +19,19 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import '../Helper/Color.dart';
-import '../Helper/PushNotificationService.dart';
-import '../Helper/Session.dart';
-import '../Model/Section_Model.dart';
-import '../Provider/CartProvider.dart';
-import '../ui/styles/DesignConfig.dart';
-import '../ui/styles/Validators.dart';
-import '../ui/widgets/ApiException.dart';
-import '../ui/widgets/AppBtn.dart';
-import '../ui/widgets/BehaviorWidget.dart';
-import '../utils/blured_router.dart';
-import 'HomePage.dart';
-import 'Privacy_Policy.dart';
-import 'package:customer/Screen/cart/Cart.dart';
-import 'package:customer/Helper/SqliteData.dart';
+import 'package:customer/Helper/Color.dart';
+import 'package:customer/Helper/PushNotificationService.dart';
+import 'package:customer/Helper/Session.dart';
+import 'package:customer/Model/Section_Model.dart';
+import 'package:customer/Provider/CartProvider.dart';
+import 'package:customer/ui/styles/DesignConfig.dart';
+import 'package:customer/ui/styles/Validators.dart';
+import 'package:customer/ui/widgets/ApiException.dart';
+import 'package:customer/ui/widgets/AppBtn.dart';
+import 'package:customer/ui/widgets/BehaviorWidget.dart';
+import 'package:customer/utils/blured_router.dart';
+import 'package:customer/screen/HomePage.dart';
+import 'package:customer/screen/Privacy_Policy.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 
 
@@ -854,7 +852,7 @@ Widget build(BuildContext context) {
             children: [
               // A base container to cover the full screen, making the stack occupy the whole view.
               SingleChildScrollView(
-                child: Container(
+                child: SizedBox(
                   height: MediaQuery.of(context).size.height,
                   width: MediaQuery.of(context).size.width,
                 ),

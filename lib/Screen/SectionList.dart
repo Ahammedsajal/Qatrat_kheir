@@ -1595,7 +1595,9 @@ class StateSection extends State<SectionListScreen>
             print("section_total-->${widget.section_model!.totalItem!}");
             isLoadingmore = true;
             if (widget.section_model!.offset! <
-                widget.section_model!.totalItem!) getSection("0");
+                widget.section_model!.totalItem!) {
+              getSection("0");
+            }
           });
         }
       }

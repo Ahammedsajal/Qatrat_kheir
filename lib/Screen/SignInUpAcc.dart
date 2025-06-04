@@ -3,7 +3,6 @@ import 'package:customer/Helper/String.dart';
 import 'package:customer/Screen/Dashboard.dart';
 import 'package:customer/ui/widgets/AppBtn.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../Helper/Color.dart';
 import '../app/routes.dart';
 

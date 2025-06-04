@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 class CurrencyService {
   // Define your manual conversion rates.

@@ -1,5 +1,4 @@
 import 'package:customer/Helper/Color.dart';
-import 'package:customer/Helper/String.dart';
 import 'package:customer/Provider/HomeProvider.dart';
 import 'package:customer/Model/Section_Model.dart';
 import 'package:customer/app/routes.dart';
@@ -7,7 +6,6 @@ import 'package:customer/Helper/Session.dart'; // Assumes this file defines & po
 import 'package:customer/ui/styles/DesignConfig.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:customer/Provider/CategoryProvider.dart';
 import '../Screen/HomePage.dart';
 
 class AllCategory extends StatefulWidget {

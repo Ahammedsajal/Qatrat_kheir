@@ -22,7 +22,6 @@ import 'package:customer/Screen/Verify_Otp.dart';
 import '../Screen/about_us.dart';
 import '../Screen/TermsScreen.dart';
 import '../Screen/PrivacyScreen.dart';
-import 'package:customer/utils/blured_router.dart';
 import 'package:flutter/material.dart';
 import '../Screen/Login.dart';
 import '../Screen/Payment.dart';
@@ -33,7 +32,6 @@ import 'package:customer/Screen/watering_feeding.dart';
 import 'package:customer/Screen/iftar.dart';
 import '../cubits/FetchMosquesCubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../settings.dart';
 
 
 

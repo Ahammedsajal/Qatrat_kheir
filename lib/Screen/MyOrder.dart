@@ -10,7 +10,6 @@ import '../Helper/Session.dart';
 import '../Helper/String.dart';
 import '../Provider/UserProvider.dart';
 import '../ui/styles/DesignConfig.dart';
-import '../ui/widgets/AppBarWidget.dart';
 import '../ui/widgets/AppBtn.dart';
 import '../utils/blured_router.dart';
 import 'HomePage.dart';

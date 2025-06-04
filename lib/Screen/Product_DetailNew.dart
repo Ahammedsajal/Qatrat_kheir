@@ -31,7 +31,6 @@ import '../Model/Faqs_Model.dart';
 import '../Model/Section_Model.dart';
 import '../Model/User.dart';
 import '../Provider/FlashSaleProvider.dart';
-import '../Provider/SettingProvider.dart';
 import '../app/routes.dart';
 import '../cubits/fetch_featured_sections_cubit.dart';
 import '../ui/styles/DesignConfig.dart';
@@ -594,7 +593,9 @@ class StateItem extends State<ProductDetail> with TickerProviderStateMixin {
     setState(() {
       context.read<ProductDetailProvider>().setProNotiLoading(true);
       if (context.read<ProductDetailProvider>().offset <
-          context.read<ProductDetailProvider>().total) getProduct1();
+          context.read<ProductDetailProvider>().total) {
+        getProduct1();
+      }
     });
   }
 

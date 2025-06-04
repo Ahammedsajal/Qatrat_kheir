@@ -1,43 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../Model/MosqueModel.dart';
 import '../Provider/MosqueProvider.dart';
 import '../cubits/FetchMosquesCubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../ui/widgets/SimpleAppBar.dart';
 import '../ui/widgets/AppBarWidget.dart';
-import 'dart:async';
-import 'dart:math';
-import 'package:collection/src/iterable_extensions.dart';
-import 'package:customer/Helper/SqliteData.dart';
-import 'package:customer/Provider/CartProvider.dart';
-import 'package:customer/Provider/FavoriteProvider.dart';
-import 'package:customer/Provider/UserProvider.dart';
 import 'package:customer/app/routes.dart';
-import 'package:customer/ui/widgets/AppBtn.dart';
-import 'package:customer/ui/widgets/SimBtn.dart';
-import 'package:customer/ui/widgets/Slideanimation.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:provider/provider.dart';
-import 'package:speech_to_text/speech_recognition_error.dart';
-import 'package:speech_to_text/speech_recognition_result.dart';
-import 'package:speech_to_text/speech_to_text.dart';
-import '../Helper/Color.dart';
-import '../Helper/Constant.dart';
 import '../Helper/Session.dart';
-import 'package:customer/Helper/String.dart' hide currencySymbol;
-import 'package:customer/app/curreny_converter.dart';
-import '../Model/Section_Model.dart';
-import '../ui/styles/DesignConfig.dart';
-import '../ui/widgets/AppBarWidget.dart';
-import '../utils/blured_router.dart';
-import 'HomePage.dart';
-import 'Search.dart';
 import '../ui/widgets/product_list_content.dart';
 
-import '../Screen/ProductList.dart';
 
 // Define your color constants
 const Color kPrimaryColor = Color(0xFF26897E);
@@ -45,7 +15,7 @@ const Color kSecondaryColor = Color(0xFF1EBAAA);
 const Color kAccentColor = Color(0xFF247B88);
 
 class MostNeededMosques extends StatefulWidget {
-  const MostNeededMosques({Key? key}) : super(key: key);
+  const MostNeededMosques({super.key});
 
   @override
   _MostNeededMosquesState createState() => _MostNeededMosquesState();
@@ -58,7 +28,7 @@ class _MostNeededMosquesState extends State<MostNeededMosques> {
   void initState() {
     super.initState();
     // Fetch mosques on init.
-    context.read<FetchMosquesCubit>().fetchMosques();
+    context.read<FetchMosquesCubit>().fetchNeededMosques();
     _selectedMosque = context.read<MosqueProvider>().selectedMosque;
   }
 
@@ -219,14 +189,13 @@ class _ActionTile extends StatelessWidget {
   final double verticalPadding;
 
   const _ActionTile({
-    Key? key,
     required this.icon,
     required this.title,
     required this.onTap,
     this.fontSize = 14,
     this.iconSize = 20,
     this.verticalPadding = 8,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

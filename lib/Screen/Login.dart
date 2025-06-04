@@ -32,8 +32,6 @@ import '../ui/widgets/BehaviorWidget.dart';
 import '../utils/blured_router.dart';
 import 'HomePage.dart';
 import 'Privacy_Policy.dart';
-import 'package:customer/Screen/cart/Cart.dart';
-import 'package:customer/Helper/SqliteData.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 
 
@@ -255,7 +253,7 @@ Widget setCountryCodeAndMobile() {
         // ===== COUNTRY CODE PICKER =====
         Theme(
           data: Theme.of(context).copyWith(
-            dialogBackgroundColor: Theme.of(context).dialogBackgroundColor,
+            dialogTheme: DialogThemeData(backgroundColor: Theme.of(context).dialogBackgroundColor),
           ),
           child: CountryCodePicker(
             onChanged: (countryCode) {
@@ -862,7 +860,7 @@ Widget build(BuildContext context) {
             children: [
               // A base container to cover the full screen, making the stack occupy the whole view.
               SingleChildScrollView(
-                child: Container(
+                child: SizedBox(
                   height: MediaQuery.of(context).size.height,
                   width: MediaQuery.of(context).size.width,
                 ),
@@ -1243,23 +1241,48 @@ Widget build(BuildContext context) {
   }
 
   Future<UserCredential?> signInWithGoogle(BuildContext context) async {
-    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+  try {
+    // Initialize GoogleSignIn with the correct clientId for iOS
+    final GoogleSignIn googleSignIn = GoogleSignIn(
+      clientId: '388298698922-frg9qq2gln7alrmf0nokvf0h0rhoroof.apps.googleusercontent.com',
+      scopes: ["profile", "email"],
+    );
+
+    print("Starting Google Sign-In...");
+    // Perform the sign-in once
+    final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
     if (googleUser == null) {
+      print("User canceled the sign-in or an error occurred.");
       setSnackbar(getTranslated(context, 'somethingSignMSG')!, context);
       return null;
     }
-    final GoogleSignInAuthentication? googleAuth = await (await GoogleSignIn(
-      scopes: ["profile", "email"],
-    ).signIn())
-        ?.authentication;
+
+    print("Fetching Google authentication details...");
+    // Use the existing googleUser to get authentication
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    if (googleAuth.accessToken == null || googleAuth.idToken == null) {
+      print("Authentication tokens are missing.");
+      setSnackbar(getTranslated(context, 'somethingMSg')!, context);
+      return null;
+    }
+
+    print("Creating Firebase credential...");
     final AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth!.accessToken,
+      accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
+
+    print("Signing in to Firebase...");
     final UserCredential userCredential =
         await _firebaseAuth.signInWithCredential(credential);
+    print("Firebase Sign-In successful: ${userCredential.user?.uid}");
     return userCredential;
+  } catch (e) {
+    print("Error during Google Sign-In: $e");
+    setSnackbar(e.toString(), context);
+    return null;
   }
+}
 
   String sha256ofString(String input) {
     final bytes = utf8.encode(input);

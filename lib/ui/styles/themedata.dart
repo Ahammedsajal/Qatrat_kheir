@@ -5,7 +5,6 @@ ThemeData lightTheme = ThemeData(
   useMaterial3: false,
   canvasColor: ThemeData().colorScheme.lightWhite,
   cardColor: colors.cardColor,
-  dialogBackgroundColor: ThemeData().colorScheme.white,
   iconTheme: ThemeData().iconTheme.copyWith(color: colors.primary),
   primarySwatch: colors.primary_app,
   primaryColor: ThemeData().colorScheme.lightWhite,
@@ -20,13 +19,12 @@ ThemeData lightTheme = ThemeData(
           titleMedium: TextStyle(
               color: ThemeData().colorScheme.fontColor,
               fontWeight: FontWeight.bold,),)
-      .apply(bodyColor: ThemeData().colorScheme.fontColor),
+      .apply(bodyColor: ThemeData().colorScheme.fontColor), dialogTheme: DialogThemeData(backgroundColor: ThemeData().colorScheme.white),
 );
 ThemeData darkTheme = ThemeData(
   useMaterial3: false,
   canvasColor: colors.darkColor,
   cardColor: colors.darkColor2,
-  dialogBackgroundColor: colors.darkColor2,
   primaryColor: colors.darkColor,
   textSelectionTheme: TextSelectionThemeData(
       cursorColor: colors.darkIcon,
@@ -90,5 +88,5 @@ ThemeData darkTheme = ThemeData(
       }
       return null;
     }),
-  ),
+  ), dialogTheme: DialogThemeData(backgroundColor: colors.darkColor2),
 );

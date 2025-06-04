@@ -178,7 +178,7 @@
   "DEFAULT_LBL": "Default",
   "MOVE_TO_CART": "Move to Cart",
   "EDIT_PROFILE_LBL": "Edit Profile",
-  "LOGIN_REGISTER_LBL": "Login/Register",
+  "LOGIN_REGISTER_LBL": "Login / Register",
   "MY_ORDERS_LBL": "My Orders",
   "MY_PROFILE_LBL": "My Profile",
   "MANAGE_ADD_LBL": "Manage Address",
@@ -530,6 +530,11 @@
       "COORDINATES": "Coordinates:",
       "CANCEL": "Cancel",
       "CONFIRM": "Confirm",
+      
+  "CHANGE_CURRENCY_LBL": "Change Currency",
+  "CHOOSE_CURRENCY_LBL": "Choose Currency",
+
+
 
     "faq_q_5": "How can I use the app?",
   "faq_a_5": "Download the app, create an account, select a mosque, and specify the quantity of water you wish to send.",

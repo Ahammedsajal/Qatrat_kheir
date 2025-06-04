@@ -27,13 +27,14 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>qatratkheir</string>
+				<string>com.googleusercontent.apps.388298698922-frg9qq2gln7alrmf0nokvf0h0rhoroof</string>
+				<string></string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.388298698922-gftnl5f973cm8jufpkaqgu0p3dkamvno</string>
+				<string>qatratkheir</string>
 			</array>
 		</dict>
 	</array>

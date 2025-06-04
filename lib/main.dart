@@ -1,4 +1,3 @@
-import 'package:customer/Helper/Color.dart';
 import 'package:customer/Helper/Constant.dart';
 import 'package:customer/Provider/CartProvider.dart';
 import 'package:customer/Provider/MosqueProvider.dart';
@@ -21,7 +20,6 @@ import 'package:customer/repository/brandsRepository.dart';
 import 'package:customer/repository/chatRepository.dart';
 import 'package:customer/ui/styles/themedata.dart';
 import 'package:customer/utils/Hive/hive_utils.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -32,7 +30,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io'; // For native platforms
 import 'package:provider/single_child_widget.dart';
-import 'package:sqflite/sqflite.dart'; // ✅ Keep only `sqflite`, no `sqflite_common_ffi`
+// ✅ Keep only `sqflite`, no `sqflite_common_ffi`
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -45,9 +43,7 @@ import 'Provider/Theme.dart';
 import 'Provider/order_provider.dart';
 import 'app/app_Localization.dart';
 import 'app/routes.dart';
-import 'firebase_options.dart';
 import 'app/curreny_converter.dart';
-import 'model/MosqueModel.dart'; 
 import 'cubits/FetchMosquesCubit.dart';
 
 /// App version
@@ -261,28 +257,7 @@ class _MyAppState extends State<MyApp> {
         debugShowCheckedModeBanner: false,
         darkTheme: darkTheme,
         themeMode: themeNotifier.getThemeMode(),
-        builder: (context, child) {
-          final bottomInset = MediaQuery.of(context).viewPadding.bottom;
-          final theme = Theme.of(context);
-
-          return Stack(
-            children: [
-              // Let content extend to the bottom, no SafeArea needed here
-              child!,
-
-              // WhatsApp Floating Button
-              Positioned(
-                bottom: bottomInset + 16, // Adjusted for iOS home indicator
-                right: 16,
-                child: FloatingActionButton(
-                  onPressed: openWhatsAppChat,
-                  backgroundColor: Colors.green,
-                  child: const Icon(FontAwesomeIcons.whatsapp, size: 30),
-                ),
-              ),
-            ],
-          );
-        },
+       builder: (context, child) => child!,
       );
     }
   }

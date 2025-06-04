@@ -19,14 +19,12 @@ import 'package:customer/Provider/SettingProvider.dart';
 import 'package:customer/Provider/UserProvider.dart';
 import 'package:customer/Screen/homeWidgets/popupOfferDialoge.dart';
 import 'package:customer/cubits/brandsListCubit.dart';
-import 'package:customer/cubits/fetch_citites.dart';
 import 'package:customer/cubits/fetch_featured_sections_cubit.dart';
+import 'package:customer/main.dart';
 import 'package:customer/ui/widgets/AppBtn.dart';
-import 'package:customer/ui/widgets/SimBtn.dart';
-import 'package:customer/utils/Extensions/extensions.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lottie/lottie.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
@@ -37,15 +35,12 @@ import 'package:version/version.dart';
 import '../Provider/ProductProvider.dart';
 import '../app/routes.dart';
 import '../ui/styles/DesignConfig.dart';
-import '../ui/styles/Validators.dart';
 import 'homeWidgets/sections/featured_section.dart';
 import 'homeWidgets/sections/styles/style_1.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
-import 'package:customer/Screen/ProductList.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:animations/animations.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -134,7 +129,21 @@ class _HomePageState extends State<HomePage>
         context.watch<FetchFeaturedSectionsCubit>().getFeaturedSections();
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.lightWhite,
-     
+      floatingActionButton: SafeArea(
+    minimum: EdgeInsets.only(bottom: 50),  // extra gap from nav bar
+    child: Padding(
+      padding: EdgeInsets.only(
+        right: 16,
+        // if you want to account for phones with gesture/home bars:
+        bottom: MediaQuery.of(context).viewPadding.bottom,
+      ),
+      child: FloatingActionButton(
+        onPressed: openWhatsAppChat,
+        backgroundColor: Colors.green,
+        child: const Icon(FontAwesomeIcons.whatsapp, size: 30),
+      ),
+    ),
+  ),
       body: _isNetworkAvail
           ? RefreshIndicator(
               color: Theme.of(context).colorScheme.primarytheme,
@@ -202,6 +211,9 @@ _catGridList(),
   const SizedBox(height: 0),
   const BrandsListWidget(),
   _section(),
+     SizedBox(
+      height: kBottomNavigationBarHeight + MediaQuery.of(context).viewPadding.bottom + 19.0, ),
+  
 ],
 
                   ),
@@ -1957,7 +1969,7 @@ class BrandsListWidget extends StatelessWidget {
 
 class NeumorphicSections extends StatelessWidget {
   final bool minimal;
-  NeumorphicSections({this.minimal = false});
+  NeumorphicSections({super.key, this.minimal = false});
 
   final List<Map<String, dynamic>> sections = [
     {
