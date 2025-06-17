@@ -5197,7 +5197,7 @@ Widget address() {
                 Column(
                   children: [
                     SizedBox(
-                      height: 80,
+                      height: 100,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         itemCount: int.parse(allowDay ?? '0'),
@@ -5761,10 +5761,19 @@ Widget address() {
         ),
         onTap: () {
           final DateTime date = today.add(Duration(days: index));
-          if (mounted) selectedDate = index;
-          selectedTime = null;
-          selTime = null;
-          selDate = DateFormat('yyyy-MM-dd').format(date);
+          if (mounted) {
+            setState(() {
+              selectedDate = index;
+              selectedTime = null;
+              selTime = null;
+              selDate = DateFormat('yyyy-MM-dd').format(date);
+            });
+          } else {
+            selectedDate = index;
+            selectedTime = null;
+            selTime = null;
+            selDate = DateFormat('yyyy-MM-dd').format(date);
+          }
           timeModel.clear();
           final DateTime cur = DateTime.now();
           final DateTime tdDate = DateTime(cur.year, cur.month, cur.day);
