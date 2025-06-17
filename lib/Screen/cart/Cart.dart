@@ -5215,13 +5215,11 @@ Widget address() {
               else if (isTimeSlot == true)
                 Column(
                   children: [
-                    SizedBox(
-                      height: 80,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: int.parse(allowDay ?? '0'),
-                        itemBuilder: (context, index) => dateCell(index),
-                      ),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: int.parse(allowDay ?? '0'),
+                      itemBuilder: (context, index) => dateCell(index),
                     ),
                     const Divider(),
                     ListView.builder(
@@ -5808,7 +5806,9 @@ Widget address() {
               }
             }
           }
+          // Refresh both main and bottom sheet states
           setState(() {});
+          checkoutState?.call(() {});
         },
       );
     }
@@ -5826,6 +5826,8 @@ Widget address() {
               }
               timeModel[index].isSelected = true;
             });
+            // Ensure the bottom sheet updates as well
+            checkoutState?.call(() {});
           }
         },
         child: RadioItem(timeModel[index]),
