@@ -159,235 +159,223 @@ class StatePayment extends State<Payment> with TickerProviderStateMixin {
           getTranslated(context, 'PAYMENT_METHOD_LBL')!,
           context,
         ),
-        body: _isNetworkAvail
-            ? _isLoading
-                ? getProgress(context) // Show loading indicator
-                : Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10.0,
-                      vertical: 5,
-                    ),
-                   child: ListView(
-                      shrinkWrap: true,
-                      children: [
-                        Expanded(
-                          child: SingleChildScrollView(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Wallet balance section
-                                Consumer<UserProvider>(
-                                  builder: (context, userProvider, _) {
-                                    return Card(
-                                      elevation: 0,
-                                      child: userProvider.curBalance != "0" &&
-                                              userProvider.curBalance.isNotEmpty &&
-                                              userProvider.curBalance != ""
-                                          ? Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                              child: CheckboxListTile(
-                                                dense: true,
-                                                contentPadding: const EdgeInsets.all(0),
-                                                value: isUseWallet,
-                                                onChanged: (bool? value) {
-                                                  if (mounted) {
-                                                    setState(() {
-                                                      isUseWallet = value;
-                                                      if (value!) {
-                                                        if ((isStorePickUp == "false"
-                                                                ? (totalPrice + deliveryCharge)
-                                                                : totalPrice) <=
-                                                            double.parse(userProvider.curBalance)) {
-                                                          remWalBal = double.parse(userProvider.curBalance) -
-                                                              (isStorePickUp == "false"
-                                                                  ? (totalPrice + deliveryCharge)
-                                                                  : totalPrice);
-                                                          usedBalance = (isStorePickUp == "false"
-                                                              ? (totalPrice + deliveryCharge)
-                                                              : totalPrice);
-                                                          paymentMethod = "Wallet";
-                                                          isPayLayShow = false;
-                                                        } else {
-                                                          remWalBal = 0;
-                                                          usedBalance = double.parse(userProvider.curBalance);
-                                                          isPayLayShow = true;
-                                                        }
-                                                        totalPrice = (isStorePickUp == "false"
-                                                            ? ((totalPrice + deliveryCharge) - usedBalance)
-                                                            : (totalPrice - usedBalance));
-                                                      } else {
-                                                        totalPrice = totalPrice +
-                                                            (isStorePickUp == "false"
-                                                                ? (usedBalance - deliveryCharge)
-                                                                : usedBalance);
-                                                        remWalBal = double.parse(userProvider.curBalance);
-                                                        paymentMethod = null;
-                                                        selectedMethod = null;
-                                                        usedBalance = 0;
-                                                        isPayLayShow = true;
-                                                      }
-                                                      widget.update();
-                                                    });
-                                                  }
-                                                },
-                                                title: Text(
-                                                  getTranslated(context, 'USE_WALLET')!,
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .titleMedium!
-                                                      .copyWith(
-                                                        color: Theme.of(context).colorScheme.fontColor,
-                                                      ),
-                                                ),
-                                                subtitle: Padding(
-                                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                                  child: Text(
-                                                    isUseWallet!
-                                                        ? "${getTranslated(context, 'REMAIN_BAL')!} : ${getPriceFormat(context, remWalBal)!}"
-                                                        : "${getTranslated(context, 'TOTAL_BAL')!} : ${getPriceFormat(context, double.parse(userProvider.curBalance))!}",
-                                                    style: TextStyle(
-                                                      fontSize: 15,
-                                                      color: Theme.of(context).colorScheme.black,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            )
-                                          : const SizedBox.shrink(),
-                                    );
+       body: _isNetworkAvail
+    ? _isLoading
+        ? getProgress(context)
+        : Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5),
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                // Wallet balance section
+                Consumer<UserProvider>(
+                  builder: (context, userProvider, _) {
+                    return Card(
+                      elevation: 0,
+                      child: userProvider.curBalance != "0" &&
+                              userProvider.curBalance.isNotEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: CheckboxListTile(
+                                dense: true,
+                                contentPadding: const EdgeInsets.all(0),
+                                value: isUseWallet,
+                                onChanged: (bool? value) {
+                                  if (mounted) {
+                                    setState(() {
+                                      isUseWallet = value;
+                                      if (value!) {
+                                        if ((isStorePickUp == "false"
+                                                ? (totalPrice + deliveryCharge)
+                                                : totalPrice) <=
+                                            double.parse(userProvider.curBalance)) {
+                                          remWalBal = double.parse(userProvider.curBalance) -
+                                              (isStorePickUp == "false"
+                                                  ? (totalPrice + deliveryCharge)
+                                                  : totalPrice);
+                                          usedBalance = (isStorePickUp == "false"
+                                              ? (totalPrice + deliveryCharge)
+                                              : totalPrice);
+                                          paymentMethod = "Wallet";
+                                          isPayLayShow = false;
+                                        } else {
+                                          remWalBal = 0;
+                                          usedBalance = double.parse(userProvider.curBalance);
+                                          isPayLayShow = true;
+                                        }
+                                        totalPrice = (isStorePickUp == "false"
+                                            ? ((totalPrice + deliveryCharge) - usedBalance)
+                                            : (totalPrice - usedBalance));
+                                      } else {
+                                        totalPrice = totalPrice +
+                                            (isStorePickUp == "false"
+                                                ? (usedBalance - deliveryCharge)
+                                                : usedBalance);
+                                        remWalBal = double.parse(userProvider.curBalance);
+                                        paymentMethod = null;
+                                        selectedMethod = null;
+                                        usedBalance = 0;
+                                        isPayLayShow = true;
+                                      }
+                                      widget.update();
+                                    });
+                                  }
+                                },
+                                title: Text(
+                                  getTranslated(context, 'USE_WALLET')!,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium!
+                                      .copyWith(
+                                        color: Theme.of(context).colorScheme.fontColor,
+                                      ),
+                                ),
+                                subtitle: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Text(
+                                    isUseWallet!
+                                        ? "${getTranslated(context, 'REMAIN_BAL')!} : ${getPriceFormat(context, remWalBal)!}"
+                                        : "${getTranslated(context, 'TOTAL_BAL')!} : ${getPriceFormat(context, double.parse(userProvider.curBalance))!}",
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      color: Theme.of(context).colorScheme.black,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                    );
+                  },
+                ),
+
+                // Time slot section
+                if (context.read<CartProvider>().cartList[0].productList![0].productType != 'digital_product')
+                  isTimeSlot! &&
+                          (isLocalDelCharge == null || isLocalDelCharge!) &&
+                          IS_LOCAL_ON != '0'
+                      ? Card(
+                          elevation: 0,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  getTranslated(context, 'PREFERED_TIME')!,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium!
+                                      .copyWith(
+                                        color: Theme.of(context).colorScheme.fontColor,
+                                      ),
+                                ),
+                              ),
+                              const Divider(),
+                              Container(
+                                height: 90,
+                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: int.parse(allowDay!),
+                                  itemBuilder: (context, index) {
+                                    return dateCell(index);
                                   },
                                 ),
-                                // Time slot selection for non-digital products
-                                if (context.read<CartProvider>().cartList[0].productList![0].productType != 'digital_product')
-                                  isTimeSlot! &&
-                                          (isLocalDelCharge == null || isLocalDelCharge!) &&
-                                          IS_LOCAL_ON != '0'
-                                      ? Card(
-                                          elevation: 0,
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Padding(
-                                                padding: const EdgeInsets.all(8.0),
-                                                child: Text(
-                                                  getTranslated(context, 'PREFERED_TIME')!,
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .titleMedium!
-                                                      .copyWith(
-                                                        color: Theme.of(context).colorScheme.fontColor,
-                                                      ),
-                                                ),
-                                              ),
-                                              const Divider(),
-                                              Container(
-                                                height: 90,
-                                                padding: const EdgeInsets.symmetric(horizontal: 10),
-                                                child: ListView.builder(
-                                                  shrinkWrap: true,
-                                                  scrollDirection: Axis.horizontal,
-                                                  itemCount: int.parse(allowDay!),
-                                                  itemBuilder: (context, index) {
-                                                    return dateCell(index);
-                                                  },
-                                                ),
-                                              ),
-                                              const Divider(),
-                                              ListView.builder(
-                                                shrinkWrap: true,
-                                                physics: const NeverScrollableScrollPhysics(),
-                                                itemCount: timeModel.length,
-                                                itemBuilder: (context, index) {
-                                                  return timeSlotItem(index);
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        )
-                                      : const SizedBox.shrink(),
-                                // Payment method selection (COD and SkipCash only)
-                                if (isPayLayShow!)
-                                  Card(
-                                    elevation: 0,
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(
-                                            getTranslated(context, 'SELECT_PAYMENT')!,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleMedium!
-                                                .copyWith(
-                                                  color: Theme.of(context).colorScheme.fontColor,
-                                                ),
-                                          ),
-                                        ),
-                                        const Divider(),
-                                        ListView.builder(
-                                          shrinkWrap: true,
-                                          physics: const NeverScrollableScrollPhysics(),
-                                          itemCount: paymentMethodList.length,
-                                          itemBuilder: (context, index) {
-                                            if (index == 0 &&
-                                                cod &&
-                                                context
-                                                        .read<CartProvider>()
-                                                        .cartList[0]
-                                                        .productList![0]
-                                                        .productType !=
-                                                    'digital_product') {
-                                              return paymentItem(index); // COD
-                                            } else if (index == 1 && skipcash) {
-                                              return paymentItem(index); // SkipCash
-                                            } else {
-                                              return const SizedBox.shrink();
-                                            }
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                else
-                                  const SizedBox.shrink(),
-                              ],
-                            ),
+                              ),
+                              const Divider(),
+                              ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: timeModel.length,
+                                itemBuilder: (context, index) {
+                                  return timeSlotItem(index);
+                                },
+                              ),
+                            ],
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+
+                // Payment method
+                if (isPayLayShow!)
+                  Card(
+                    elevation: 0,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            getTranslated(context, 'SELECT_PAYMENT')!,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(
+                                  color: Theme.of(context).colorScheme.fontColor,
+                                ),
                           ),
                         ),
-                        // Done button
-                        SimBtn(
-                          width: 0.8,
-                          height: 35,
-                          title: getTranslated(context, 'DONE'),
-                          onBtnSelected: () {
-                            if (paymentMethod == null || paymentMethod!.isEmpty) {
-                              setSnackbar(getTranslated(context, 'payWarning')!, context);
-                            } else if (context.read<CartProvider>().cartList[0].productList![0].productType != 'digital_product' &&
-                                isTimeSlot! &&
-                                (isLocalDelCharge == null || isLocalDelCharge!) &&
-                                int.parse(allowDay!) > 0 &&
-                                (selDate == null || selDate!.isEmpty) &&
-                                IS_LOCAL_ON != '0') {
-                              setSnackbar(getTranslated(context, 'dateWarning')!, context);
-                            } else if (context.read<CartProvider>().cartList[0].productList![0].productType != 'digital_product' &&
-                                isTimeSlot! &&
-                                (isLocalDelCharge == null || isLocalDelCharge!) &&
-                                timeSlotList.isNotEmpty &&
-                                (selTime == null || selTime!.isEmpty) &&
-                                IS_LOCAL_ON != '0') {
-                              setSnackbar(getTranslated(context, 'timeWarning')!, context);
+                        const Divider(),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: paymentMethodList.length,
+                          itemBuilder: (context, index) {
+                            if (index == 0 &&
+                                cod &&
+                                context.read<CartProvider>().cartList[0].productList![0].productType != 'digital_product') {
+                              return paymentItem(index);
+                            } else if (index == 1 && skipcash) {
+                              return paymentItem(index);
                             } else {
-                              Navigator.pop(context);
+                              return const SizedBox.shrink();
                             }
                           },
                         ),
                       ],
                     ),
                   )
-            : noInternet(context),
+                else
+                  const SizedBox.shrink(),
+
+                // DONE button
+                SimBtn(
+                  width: 0.8,
+                  height: 35,
+                  title: getTranslated(context, 'DONE'),
+                  onBtnSelected: () {
+                    if (paymentMethod == null || paymentMethod!.isEmpty) {
+                      setSnackbar(getTranslated(context, 'payWarning')!, context);
+                    } else if (
+                        context.read<CartProvider>().cartList[0].productList![0].productType != 'digital_product' &&
+                        isTimeSlot! &&
+                        (isLocalDelCharge == null || isLocalDelCharge!) &&
+                        int.parse(allowDay!) > 0 &&
+                        (selDate == null || selDate!.isEmpty) &&
+                        IS_LOCAL_ON != '0') {
+                      setSnackbar(getTranslated(context, 'dateWarning')!, context);
+                    } else if (
+                        context.read<CartProvider>().cartList[0].productList![0].productType != 'digital_product' &&
+                        isTimeSlot! &&
+                        (isLocalDelCharge == null || isLocalDelCharge!) &&
+                        timeSlotList.isNotEmpty &&
+                        (selTime == null || selTime!.isEmpty) &&
+                        IS_LOCAL_ON != '0') {
+                      setSnackbar(getTranslated(context, 'timeWarning')!, context);
+                    } else {
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+              ],
+            ),
+          )
+    : noInternet(context),
+
       ),
     );
   }
