@@ -167,9 +167,14 @@ class StatePayment extends State<Payment> with TickerProviderStateMixin {
                       horizontal: 10.0,
                       vertical: 5,
                     ),
-                    child: ListView(
+                   child: ListView(
                       shrinkWrap: true,
                       children: [
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
                                 // Wallet balance section
                                 Consumer<UserProvider>(
                                   builder: (context, userProvider, _) {
