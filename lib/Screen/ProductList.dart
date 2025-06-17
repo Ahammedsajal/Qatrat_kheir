@@ -906,7 +906,7 @@ class StateProduct extends State<ProductListScreen>
     }
   }
 
-  removeFromCart(int index) async {
+  removeFromCart(int index, {bool intent = false}) async {
     _isNetworkAvail = await isNetworkAvailable();
     if (_isNetworkAvail) {
       if (context.read<UserProvider>().userId != "") {
