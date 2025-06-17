@@ -104,9 +104,7 @@ import '../../utils/Hive/hive_utils.dart';
     List<String> productIds = [];
     List<String> proVarIds = [];
     DatabaseHelper db = DatabaseHelper();
-    final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
     bool isAvailable = true;
-    bool confDia = true;
     String razorpayOrderId = '';
     String? rozorpayMsg;
     @override
@@ -4003,14 +4001,36 @@ buildConvertedPrice(
                                                     return;
                                                   }
 
-                                                 if (confDia) {
-                                                    if (!context.read<CartProvider>().isProgress) {
-                                                      confirmDialog(cartList);
-                                                      setState(() {
-                                                        confDia = false;
-                                                      });
-                                                    }
-                                                  } 
+                                                 if (!context.read<CartProvider>().isProgress) {
+                                                   if (cartList[0].productList![0].productType ==
+                                                       'digital_product') {
+                                                     if (mobileController.text.trim().isEmpty) {
+                                                       setSnackbar(
+                                                         getTranslated(context, 'MOBILE_REQUIRED') ??
+                                                             'Mobile number is required',
+                                                         context,
+                                                       );
+                                                       checkoutState?.call(() {
+                                                         _placeOrder = true;
+                                                       });
+                                                       return;
+                                                     }
+
+                                                     final String? emailError = validateEmail(
+                                                       emailController.text.trim(),
+                                                       getTranslated(context, 'EMAIL_REQUIRED'),
+                                                       getTranslated(context, 'VALID_EMAIL'),
+                                                     );
+                                                     if (emailError != null) {
+                                                       setSnackbar(emailError, context);
+                                                       checkoutState?.call(() {
+                                                         _placeOrder = true;
+                                                       });
+                                                       return;
+                                                     }
+                                                   }
+                                                   placeOrder('');
+                                                 }
                                                 },
                                               ),
                                             ),
@@ -5526,385 +5546,6 @@ Widget address() {
       }
     }
 
-    bool validateAndSave() {
-      final form = _formkey.currentState!;
-      form.save();
-      if (form.validate()) {
-        return true;
-      }
-      return false;
-    }
-
-   void confirmDialog(List<SectionModel> cartList) {
-  showGeneralDialog(
-    barrierColor: Theme.of(context).colorScheme.black.withOpacity(0.5),
-    transitionBuilder: (context, a1, a2, widget) {
-      return Transform.scale(
-        scale: a1.value,
-        child: Opacity(
-          opacity: a1.value,
-          child: AlertDialog(
-            contentPadding: EdgeInsets.zero,
-            elevation: 2.0,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(5.0)),
-            ),
-            content: Form(
-              key: _formkey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20.0, 20.0, 0, 2.0),
-                    child: Text(
-                      getTranslated(context, 'CONFIRM_ORDER')!,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium!
-                          .copyWith(
-                            color: Theme.of(context).colorScheme.fontColor,
-                          ),
-                    ),
-                  ),
-                  Divider(
-                    color: Theme.of(context).colorScheme.lightBlack,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20.0, 0, 20.0, 0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              getTranslated(context, 'SUBTOTAL')!,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall!
-                                  .copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .lightBlack2,
-                                  ),
-                            ),
-                            buildConvertedPrice(
-                              context,
-                              originalPrice,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall!
-                                  .copyWith(
-                                    color:
-                                        Theme.of(context).colorScheme.fontColor,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                          ],
-                        ),
-                        if (cartList[0].productList![0].productType !=
-                            'digital_product')
-                          if (isStorePickUp == "false")
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  getTranslated(context, 'DELIVERY_CHARGE')!,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall!
-                                      .copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .lightBlack2,
-                                      ),
-                                ),
-                                buildConvertedPrice(
-                                  context,
-                                  deliveryCharge,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall!
-                                      .copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .fontColor,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                              ],
-                            ),
-                        if (isPromoValid!)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                getTranslated(context, 'PROMO_CODE_DIS_LBL')!,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall!
-                                    .copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .lightBlack2,
-                                    ),
-                              ),
-                              buildConvertedPrice(
-                                context,
-                                promoAmount,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall!
-                                    .copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .fontColor,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          )
-                        else
-                          const SizedBox.shrink(),
-                        if (isUseWallet!)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                getTranslated(context, 'WALLET_BAL')!,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall!
-                                    .copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .lightBlack2,
-                                    ),
-                              ),
-                              buildConvertedPrice(
-                                context,
-                                usedBalance,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall!
-                                    .copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .fontColor,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          )
-                        else
-                          const SizedBox.shrink(),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                getTranslated(context, 'TOTAL_PRICE')!,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall!
-                                    .copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .lightBlack2,
-                                    ),
-                              ),
-                              usedBalance > 0
-                                  ? buildConvertedPrice(
-                                      context,
-                                      totalPrice,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium!
-                                          .copyWith(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .fontColor,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                    )
-                                  : isStorePickUp == "false"
-                                      ? buildConvertedPrice(
-                                          context,
-                                          totalPrice + deliveryCharge,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium!
-                                              .copyWith(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .fontColor,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                        )
-                                      : buildConvertedPrice(
-                                          context,
-                                          totalPrice,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium!
-                                              .copyWith(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .fontColor,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                        ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          child: TextField(
-                            controller: noteC,
-                            style: Theme.of(context).textTheme.titleSmall,
-                            decoration: InputDecoration(
-                              contentPadding:
-                                  const EdgeInsets.symmetric(horizontal: 10),
-                              border: InputBorder.none,
-                              filled: true,
-                              fillColor: Theme.of(context)
-                                  .colorScheme
-                                  .primarytheme
-                                  .withOpacity(0.1),
-                              hintText: getTranslated(context, 'NOTE'),
-                            ),
-                          ),
-                        ),
-                        if (cartList[0].productList![0].productType !=
-                            'digital_product')
-                          const SizedBox.shrink()
-                        else
-                          Column(
-                            children: [
-                              Container(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 5),
-                                child: TextFormField(
-                                  validator: (val) {
-                                    if (val == null || val.trim().isEmpty) {
-                                      return getTranslated(
-                                              context, 'MOBILE_REQUIRED') ??
-                                          'Mobile number is required';
-                                    }
-                                    // Add more mobile-specific validations if needed
-                                    return null;
-                                  },
-                                  controller: mobileController,
-                                  style: Theme.of(context).textTheme.titleSmall,
-                                  decoration: InputDecoration(
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 10),
-                                    border: InputBorder.none,
-                                    filled: true,
-                                    fillColor: Theme.of(context)
-                                        .colorScheme
-                                        .primarytheme
-                                        .withOpacity(0.1),
-                                    hintText: getTranslated(
-                                            context, 'ENTER_MOBILE_NUMBER') ??
-                                        'Enter mobile number',
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 5),
-                                child: TextFormField(
-                                  validator: (val) => validateEmail(
-                                    val!,
-                                    getTranslated(context, 'EMAIL_REQUIRED'),
-                                    getTranslated(context, 'VALID_EMAIL'),
-                                  ),
-                                  controller: emailController,
-                                  style: Theme.of(context).textTheme.titleSmall,
-                                  decoration: InputDecoration(
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 10),
-                                    border: InputBorder.none,
-                                    filled: true,
-                                    fillColor: Theme.of(context)
-                                        .colorScheme
-                                        .primarytheme
-                                        .withOpacity(0.1),
-                                    hintText: getTranslated(
-                                            context, 'ENTER_EMAIL_ID_LBL') ??
-                                        'Enter email',
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: Text(
-                  getTranslated(context, 'CANCEL')!,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.lightBlack,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                onPressed: () {
-                  checkoutState?.call(() {
-                    _placeOrder = true;
-                    isPromoValid = false;
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              TextButton(
-                child: Text(
-                  getTranslated(context, 'DONE')!,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primarytheme,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                onPressed: () {
-                  // Validate form for digital products (mobile, email)
-                  if (cartList[0].productList![0].productType ==
-                      'digital_product') {
-                    _log.info(
-                        'Validating form for digital product: ${validateAndSave()}');
-                    if (!validateAndSave()) {
-                      return; // Stop if validation fails
-                    }
-                  }
-                  // Proceed to place order and close dialog
-                  placeOrder('');
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        ),
-      );
-    },
-    barrierLabel: '',
-    context: context,
-    pageBuilder: (context, animation1, animation2) {
-      return const SizedBox.shrink();
-    },
-  ).then(
-    (value) => setState(() {
-      confDia = true;
-    }),
-  );
-}
     Future<void> checkDeliverable(
   int from, {
   bool showErrorMessage = true,
