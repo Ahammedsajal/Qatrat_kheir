@@ -350,26 +350,19 @@ class StatePayment extends State<Payment> with TickerProviderStateMixin {
                   onBtnSelected: () {
                     if (paymentMethod == null || paymentMethod!.isEmpty) {
                       setSnackbar(getTranslated(context, 'payWarning')!, context);
-                    } else if (
-                        context.read<CartProvider>().cartList[0].productList![0].productType != 'digital_product' &&
-                        isTimeSlot! &&
-                        (isLocalDelCharge == null || isLocalDelCharge!) &&
-                        int.parse(allowDay!) > 0 &&
-                        (selDate == null || selDate!.isEmpty) &&
-                        IS_LOCAL_ON != '0') {
-                      setSnackbar(getTranslated(context, 'dateWarning')!, context);
-                    } else if (
-                        context.read<CartProvider>().cartList[0].productList![0].productType != 'digital_product' &&
-                        isTimeSlot! &&
-                        (isLocalDelCharge == null || isLocalDelCharge!) &&
-                        timeSlotList.isNotEmpty &&
-                        (selTime == null || selTime!.isEmpty) &&
-                        IS_LOCAL_ON != '0') {
-                      setSnackbar(getTranslated(context, 'timeWarning')!, context);
                     } else {
+                      if ((selDate == null || selDate!.isEmpty) && startingDate != null) {
+                        final DateTime first = DateTime.parse(startingDate!);
+                        selDate = DateFormat('yyyy-MM-dd').format(first);
+                        selectedDate ??= 0;
+                      }
+                      if ((selTime == null || selTime!.isEmpty) && timeSlotList.isNotEmpty) {
+                        selTime = timeSlotList[0].name;
+                        selectedTime ??= 0;
+                      }
                       Navigator.pop(context);
                     }
-                  },
+                 },
                 ),
               ],
             ),
@@ -385,6 +378,7 @@ class StatePayment extends State<Payment> with TickerProviderStateMixin {
     final DateTime today = DateTime.parse(startingDate!);
     return InkWell(
       child: Container(
+        width: 65,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           color: selectedDate == index ? Theme.of(context).colorScheme.primarytheme : null,
@@ -492,7 +486,19 @@ class StatePayment extends State<Payment> with TickerProviderStateMixin {
               startingDate = timeSlot["starting_date"];
               codAllowed = data["is_cod_allowed"] == 1 ? true : false;
               final timeSlots = data["time_slots"];
-              timeSlotList = (timeSlots as List).map((timeSlots) => Model.fromTimeSlot(timeSlots)).toList();
+              timeSlotList =
+                  (timeSlots as List).map((timeSlots) => Model.fromTimeSlot(timeSlots)).toList();
+
+              // Set default date and time if user hasn't selected anything yet
+              if ((selDate == null || selDate!.isEmpty) && startingDate != null) {
+                final DateTime first = DateTime.parse(startingDate!);
+                selDate = DateFormat('yyyy-MM-dd').format(first);
+                selectedDate = 0;
+              }
+              if ((selTime == null || selTime!.isEmpty) && timeSlotList.isNotEmpty) {
+                selTime = timeSlotList[0].name;
+                selectedTime = 0;
+              }
 
               if (timeSlotList.isNotEmpty) {
                 for (int i = 0; i < timeSlotList.length; i++) {

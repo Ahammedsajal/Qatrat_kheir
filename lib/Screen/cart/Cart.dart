@@ -3930,34 +3930,15 @@ buildConvertedPrice(
                                                     return;
                                                   }
 
-                                                  if (cartList[0].productList![0].productType !=
-                                                          'digital_product' &&
-                                                      isTimeSlot! &&
-                                                      (isLocalDelCharge == null || isLocalDelCharge!) &&
-                                                      int.parse(allowDay!) > 0 &&
-                                                      (selDate == null || selDate!.isEmpty) &&
-                                                      IS_LOCAL_ON != '0') {
-                                                    msg = getTranslated(context, 'dateWarning');
-                                                    setSnackbar(msg!, context);
-                                                    checkoutState?.call(() {
-                                                      _placeOrder = true;
-                                                    });
-                                                    return;
+                                                  if ((selDate == null || selDate!.isEmpty) && startingDate != null) {
+                                                    final DateTime first = DateTime.parse(startingDate!);
+                                                    selDate = DateFormat('yyyy-MM-dd').format(first);
+                                                    selectedDate ??= 0;
                                                   }
 
-                                                  if (cartList[0].productList![0].productType !=
-                                                          'digital_product' &&
-                                                      isTimeSlot! &&
-                                                      (isLocalDelCharge == null || isLocalDelCharge!) &&
-                                                      timeSlotList.isNotEmpty &&
-                                                      (selTime == null || selTime!.isEmpty) &&
-                                                      IS_LOCAL_ON != '0') {
-                                                    msg = getTranslated(context, 'timeWarning');
-                                                    setSnackbar(msg!, context);
-                                                    checkoutState?.call(() {
-                                                      _placeOrder = true;
-                                                    });
-                                                    return;
+                                                  if ((selTime == null || selTime!.isEmpty) && timeSlotList.isNotEmpty) {
+                                                    selTime = timeSlotList[0].name;
+                                                    selectedTime ??= 0;
                                                   }
 
                                                   if (double.parse(MIN_ALLOW_CART_AMT!) > originalPrice) {
@@ -5696,6 +5677,17 @@ Widget address() {
                 timeSlotList = (timeSlots as List)
                     .map((ts) => Model.fromTimeSlot(ts))
                     .toList();
+
+                // Default to first available date/time when none selected
+                if ((selDate == null || selDate!.isEmpty) && startingDate != null) {
+                  final DateTime first = DateTime.parse(startingDate!);
+                  selDate = DateFormat('yyyy-MM-dd').format(first);
+                  selectedDate = 0;
+                }
+                if ((selTime == null || selTime!.isEmpty) && timeSlotList.isNotEmpty) {
+                  selTime = timeSlotList[0].name;
+                  selectedTime = 0;
+                }
               }
               if (mounted) {
                 checkoutState?.call(() {});
@@ -5725,6 +5717,7 @@ Widget address() {
       final DateTime today = DateTime.parse(startingDate!);
       return InkWell(
         child: Container(
+          width: 65,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
             color: selectedDate == index
