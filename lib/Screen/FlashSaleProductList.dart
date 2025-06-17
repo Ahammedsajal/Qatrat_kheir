@@ -19,6 +19,8 @@ import '../app/routes.dart';
 import '../ui/styles/DesignConfig.dart';
 import '../ui/widgets/AppBarWidget.dart';
 import '../ui/widgets/AppBtn.dart';
+import '../ui/widgets/SimBtn.dart';
+import 'cart/Cart.dart';
 import 'HomePage.dart';
 
 class FlashProductList extends StatefulWidget {
@@ -175,7 +177,7 @@ class StateFlashList extends State<FlashProductList>
   }
 
   Future<void> addToCart(
-      int index, String qty, int from, FlashSaleModel data,) async {
+      int index, String qty, int from, FlashSaleModel data,{bool intent = false}) async {
     try {
       final Product model = data.products!.product![index];
       _isNetworkAvail = await isNetworkAvailable();
@@ -217,6 +219,15 @@ class StateFlashList extends State<FlashProductList>
                 setState(() {
                   _isProgress = false;
                 });
+                if (intent) {
+                  cartTotalClear();
+                  Navigator.push(
+                    context,
+                    CupertinoPageRoute(
+                      builder: (context) => const Cart(fromBottom: false),
+                    ),
+                  );
+                }
               }
             }, onError: (error) {
               setSnackbar(error.toString(), context);
@@ -275,6 +286,15 @@ class StateFlashList extends State<FlashProductList>
           setState(() {
             _isProgress = false;
           });
+          if (intent) {
+            cartTotalClear();
+            Navigator.push(
+              context,
+              CupertinoPageRoute(
+                builder: (context) => const Cart(fromBottom: false),
+              ),
+            );
+          }
         }
       } else {
         if (mounted) {
@@ -884,19 +904,38 @@ class StateFlashList extends State<FlashProductList>
                     ),
                   ),
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.only(start: 5.0, bottom: 5),
-                    child: Text(
-                      model.name!,
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                          color: Theme.of(context).colorScheme.lightBlack,),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  padding:
+                      const EdgeInsetsDirectional.only(start: 5.0, bottom: 5),
+                  child: Text(
+                    model.name!,
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                        color: Theme.of(context).colorScheme.lightBlack,),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ],
-              ),
-              onTap: () {
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                  child: SimBtn(
+                    width: 0.9,
+                    height: 30,
+                    title: getTranslated(context, 'BUYNOW2'),
+                    onBtnSelected: () {
+                      addToCart(
+                        index,
+                        (int.parse(_controller[index].text) +
+                                int.parse(model.qtyStepSize!))
+                            .toString(),
+                        1,
+                        dataModel,
+                        intent: true,
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            onTap: () {
                 final Product model = dataModel.products!.product![index];
                 currentHero = saleSecHero;
                 Navigator.pushNamed(context, Routers.productDetails,

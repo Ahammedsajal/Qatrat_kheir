@@ -19,6 +19,7 @@ import '../ui/styles/DesignConfig.dart';
 import '../ui/widgets/AppBarWidget.dart';
 import '../ui/widgets/AppBtn.dart';
 import '../ui/widgets/SimBtn.dart';
+import 'cart/Cart.dart';
 import '../utils/blured_router.dart';
 import 'HomePage.dart';
 
@@ -849,7 +850,7 @@ class StateSection extends State<SaleSectionScreen>
     }
   }
 
-  Future<void> addToCart(int index, String qty, int from) async {
+  Future<void> addToCart(int index, String qty, int from, {bool intent = false}) async {
     try {
       final Product model = widget.section_model!.productList![index];
       _isNetworkAvail = await isNetworkAvailable();
@@ -886,6 +887,15 @@ class StateSection extends State<SaleSectionScreen>
                 setState(() {
                   _isProgress = false;
                 });
+                if (intent) {
+                  cartTotalClear();
+                  Navigator.push(
+                    context,
+                    CupertinoPageRoute(
+                      builder: (context) => const Cart(fromBottom: false),
+                    ),
+                  );
+                }
               }
             }, onError: (error) {
               setSnackbar(error.toString(), context);
@@ -893,10 +903,19 @@ class StateSection extends State<SaleSectionScreen>
           } on TimeoutException catch (_) {
             setSnackbar(getTranslated(context, 'somethingMSg')!, context);
             if (mounted) {
-              setState(() {
-                _isProgress = false;
-              });
-            }
+        setState(() {
+          _isProgress = false;
+        });
+        if (intent) {
+          cartTotalClear();
+          Navigator.push(
+            context,
+            CupertinoPageRoute(
+              builder: (context) => const Cart(fromBottom: false),
+            ),
+          );
+        }
+      }
           }
         } else {
           setState(() {
@@ -2101,6 +2120,24 @@ class StateSection extends State<SaleSectionScreen>
                                         .lightBlack,),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                          child: SimBtn(
+                            width: 0.9,
+                            height: 30,
+                            title: getTranslated(context, 'BUYNOW2'),
+                            onBtnSelected: () {
+                              addToCart(
+                                index,
+                                (int.parse(_controller[index].text) +
+                                        int.parse(model.qtyStepSize!))
+                                    .toString(),
+                                1,
+                                intent: true,
+                              );
+                            },
                           ),
                         ),
                       ],

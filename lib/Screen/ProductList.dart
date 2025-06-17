@@ -25,6 +25,7 @@ import '../Model/Section_Model.dart';
 import '../ui/styles/DesignConfig.dart';
 import '../ui/widgets/AppBarWidget.dart';
 import '../utils/blured_router.dart';
+import 'cart/Cart.dart';
 import 'HomePage.dart';
 import 'Search.dart';
 
@@ -942,6 +943,15 @@ class StateProduct extends State<ProductListScreen>
                 .map((cart) => SectionModel.fromCart(cart))
                 .toList();
             context.read<CartProvider>().setCartlist(cartList);
+            if (intent) {
+              cartTotalClear();
+              Navigator.push(
+                context,
+                CupertinoPageRoute(
+                  builder: (context) => const Cart(fromBottom: false),
+                ),
+              );
+            }
           } else {
             setSnackbar(msg!, context);
           }
@@ -1752,6 +1762,24 @@ class StateProduct extends State<ProductListScreen>
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                    child: SimBtn(
+                      width: 0.9,
+                      height: 30,
+                      title: getTranslated(context, 'BUYNOW2'),
+                      onBtnSelected: () {
+                        addToCart(
+                          index,
+                          (int.parse(_controller[index].text) +
+                                  int.parse(model.qtyStepSize!))
+                              .toString(),
+                          1,
+                          intent: true,
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -1993,7 +2021,7 @@ class StateProduct extends State<ProductListScreen>
     );
   }
 
-  Future<void> addToCart(int index, String qty, int from) async {
+  Future<void> addToCart(int index, String qty, int from, {bool intent = false}) async {
     _isNetworkAvail = await isNetworkAvailable();
     if (_isNetworkAvail) {
       if (context.read<UserProvider>().userId != "") {
