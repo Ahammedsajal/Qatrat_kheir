@@ -1771,8 +1771,8 @@ class StateProduct extends State<ProductListScreen>
                       width: 0.9,
                       height: 30,
                       title: getTranslated(context, 'BUYNOW2'),
-                      onBtnSelected: () {
-                        addToCart(
+                      onBtnSelected: () async {
+                        await addToCart(
                           index,
                           (int.parse(_controller[index].text) +
                                   int.parse(model.qtyStepSize!))
