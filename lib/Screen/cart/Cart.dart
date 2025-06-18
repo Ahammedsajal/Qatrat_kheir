@@ -58,7 +58,8 @@ import '../../utils/Hive/hive_utils.dart';
 
   class Cart extends StatefulWidget {
     final bool fromBottom;
-    const Cart({super.key, required this.fromBottom});
+    final bool buyNow;
+    const Cart({super.key, required this.fromBottom, this.buyNow = false});
     @override
     State<StatefulWidget> createState() => StateCart();
   }
@@ -2219,6 +2220,11 @@ buildConvertedPrice(
               setState(() {
                 _isCartLoad = false;
               });
+              if (widget.buyNow) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  checkout();
+                });
+              }
             }
           },
           onError: (error) {
@@ -2293,6 +2299,11 @@ buildConvertedPrice(
                   setState(() {
                     _isCartLoad = false;
                   });
+                  if (widget.buyNow) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      checkout();
+                    });
+                  }
                 }
               },
               onError: (error) {
@@ -2314,6 +2325,11 @@ buildConvertedPrice(
         setState(() {
           _isCartLoad = false;
         });
+        if (widget.buyNow) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            checkout();
+          });
+        }
       }
     }
 
@@ -5762,7 +5778,7 @@ Widget address() {
         onTap: () {
           final DateTime date = today.add(Duration(days: index));
           if (mounted) {
-            setState(() {
+            checkoutState?.call(() {
               selectedDate = index;
               selectedTime = null;
               selTime = null;
@@ -5810,7 +5826,7 @@ Widget address() {
               }
             }
           }
-          setState(() {});
+          checkoutState?.call(() {});
         },
       );
     }
@@ -5820,7 +5836,7 @@ Widget address() {
       return InkWell(
         onTap: () {
           if (mounted) {
-            setState(() {
+            checkoutState?.call(() {
               selectedTime = index;
               selTime = timeModel[selectedTime!].name;
               for (final element in timeModel) {
