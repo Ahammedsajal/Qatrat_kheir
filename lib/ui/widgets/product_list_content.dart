@@ -551,10 +551,8 @@ class StateProduct extends State<ProductListContent>
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                                      child: Wrap(
-                                        spacing: 5,
-                                        runSpacing: 5,
-                                        crossAxisAlignment: WrapCrossAlignment.center,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           if (_controller[index].text != "0" &&
                                               model.availability != "0" &&
@@ -646,9 +644,10 @@ class StateProduct extends State<ProductListContent>
                                                     );
                                                   },
                                                 ),
-                                              ],
-                                            ),
-                                          SizedBox(
+                                               ],
+                                             ),
+                                           const SizedBox(height: 5),
+                                           SizedBox(
                                             width: 110,
                                             height: 32,
                                             child: SimBtn(
