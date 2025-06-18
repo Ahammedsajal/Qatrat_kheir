@@ -1781,22 +1781,26 @@ class StateProduct extends State<ProductListScreen>
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  const SizedBox(height: 5),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                    child: SimBtn(
-                      width: 0.9,
-                      height: 30,
-                      title: getTranslated(context, 'BUYNOW2'),
-                      onBtnSelected: () async {
-                        await addToCart(
-                          index,
-                          (int.parse(_controller[index].text) +
-                                  int.parse(model.qtyStepSize!))
-                              .toString(),
-                          1,
-                          intent: true,
-                        );
-                      },
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: SimBtn(
+                        width: 0.5,
+                        height: 28,
+                        title: getTranslated(context, 'BUYNOW2'),
+                        onBtnSelected: () async {
+                          await addToCart(
+                            index,
+                            (int.parse(_controller[index].text) +
+                                    int.parse(model.qtyStepSize!))
+                                .toString(),
+                            1,
+                            intent: true,
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ],
@@ -2075,6 +2079,18 @@ class StateProduct extends State<ProductListScreen>
                 .map((cart) => SectionModel.fromCart(cart))
                 .toList();
             context.read<CartProvider>().setCartlist(cartList);
+            if (intent) {
+              cartTotalClear();
+              Navigator.push(
+                context,
+                CupertinoPageRoute(
+                  builder: (context) => const Cart(
+                    fromBottom: false,
+                    buyNow: true,
+                  ),
+                ),
+              );
+            }
           } else {
             setSnackbar(msg!, context);
           }
