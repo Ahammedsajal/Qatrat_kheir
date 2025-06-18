@@ -549,136 +549,123 @@ class StateProduct extends State<ProductListContent>
                                         );
                                       },
                                     ),
-                                    if (_controller[index].text != "0")
-                                      Row(
-                                        children: [
-                                          if (model.availability == "0")
-                                            const SizedBox.shrink()
-                                          else if (cartBtnList)
-                                            Row(
-                                              children: <Widget>[
-                                                Row(
-                                                  children: <Widget>[
-                                                    InkWell(
-                                                      child: Card(
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius.circular(50),
-                                                        ),
-                                                        child: const Padding(
-                                                          padding: EdgeInsets.all(8.0),
-                                                          child: Icon(
-                                                            Icons.remove,
-                                                            size: 15,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      onTap: () {
-                                                        if (int.parse(_controller[index].text) > 0) {
-                                                          removeFromCart(index);
-                                                        }
-                                                      },
-                                                    ),
-                                                    Container(
-                                                      width: 37,
-                                                      height: 20,
-                                                      decoration: BoxDecoration(
-                                                        color: Theme.of(context)
-                                                            .colorScheme
-                                                            .white,
-                                                        borderRadius: BorderRadius.circular(5),
-                                                      ),
-                                                      child: Stack(
-                                                        children: [
-                                                          TextField(
-                                                            textAlign: TextAlign.center,
-                                                            readOnly: true,
-                                                            style: TextStyle(
-                                                                fontSize: 12,
-                                                                color: Theme.of(context)
-                                                                    .colorScheme
-                                                                    .fontColor),
-                                                            controller: _controller[index],
-                                                            decoration: const InputDecoration(
-                                                              border: InputBorder.none,
-                                                            ),
-                                                          ),
-                                                          PopupMenuButton<String>(
-                                                            tooltip: '',
-                                                            icon: const Icon(
-                                                              Icons.arrow_drop_down,
-                                                              size: 1,
-                                                            ),
-                                                            onSelected: (String value) {
-                                                              addToCart(index, value, 2);
-                                                            },
-                                                            itemBuilder: (BuildContext context) {
-                                                              return model.itemsCounter!.map<PopupMenuItem<String>>(
-                                                                  (String value) {
-                                                                return PopupMenuItem(
-                                                                  value: value,
-                                                                  child: Text(
-                                                                    value,
-                                                                    style: TextStyle(
-                                                                        color: Theme.of(context)
-                                                                            .colorScheme
-                                                                            .fontColor),
-                                                                  ),
-                                                                );
-                                                              }).toList();
-                                                            },
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    InkWell(
-                                                      child: Card(
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius.circular(50),
-                                                        ),
-                                                        child: const Padding(
-                                                          padding: EdgeInsets.all(8.0),
-                                                          child: Icon(
-                                                            Icons.add,
-                                                            size: 15,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      onTap: () {
-                                                        addToCart(
-                                                          index,
-                                                          (int.parse(_controller[index].text) +
-                                                                  int.parse(model.qtyStepSize!))
-                                                              .toString(),
-                                                          2,
-                                                        );
-                                                      },
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            )
-                                          else
-                                            const SizedBox.shrink(),
-                                        ],
-                                      )
-                                    else
-                                      const SizedBox.shrink(),
                                     Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                                      child: SimBtn(
-                                        width: 0.9,
-                                        height: 30,
-                                        title: getTranslated(context, 'BUYNOW2'),
-                                        onBtnSelected: () async {
-                                          await addToCart(
-                                            index,
-                                            (int.parse(_controller[index].text) + int.parse(model.qtyStepSize!)).toString(),
-                                            1,
-                                            intent: true,
-                                          );
-                                        },
+                                      child: Wrap(
+                                        spacing: 5,
+                                        runSpacing: 5,
+                                        crossAxisAlignment: WrapCrossAlignment.center,
+                                        children: [
+                                          if (_controller[index].text != "0" &&
+                                              model.availability != "0" &&
+                                              cartBtnList)
+                                            Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                InkWell(
+                                                  child: Card(
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(50),
+                                                    ),
+                                                    child: const Padding(
+                                                      padding: EdgeInsets.all(8.0),
+                                                      child: Icon(
+                                                        Icons.remove,
+                                                        size: 15,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  onTap: () {
+                                                    if (int.parse(_controller[index].text) > 0) {
+                                                      removeFromCart(index);
+                                                    }
+                                                  },
+                                                ),
+                                                Container(
+                                                  width: 37,
+                                                  height: 20,
+                                                  decoration: BoxDecoration(
+                                                    color: Theme.of(context).colorScheme.white,
+                                                    borderRadius: BorderRadius.circular(5),
+                                                  ),
+                                                  child: Stack(
+                                                    children: [
+                                                      TextField(
+                                                        textAlign: TextAlign.center,
+                                                        readOnly: true,
+                                                        style: TextStyle(
+                                                            fontSize: 12,
+                                                            color: Theme.of(context).colorScheme.fontColor),
+                                                        controller: _controller[index],
+                                                        decoration: const InputDecoration(
+                                                          border: InputBorder.none,
+                                                        ),
+                                                      ),
+                                                      PopupMenuButton<String>(
+                                                        tooltip: '',
+                                                        icon: const Icon(
+                                                          Icons.arrow_drop_down,
+                                                          size: 1,
+                                                        ),
+                                                        onSelected: (String value) {
+                                                          addToCart(index, value, 2);
+                                                        },
+                                                        itemBuilder: (BuildContext context) {
+                                                          return model.itemsCounter!.map<PopupMenuItem<String>>((String value) {
+                                                            return PopupMenuItem(
+                                                              value: value,
+                                                              child: Text(
+                                                                value,
+                                                                style: TextStyle(color: Theme.of(context).colorScheme.fontColor),
+                                                              ),
+                                                            );
+                                                          }).toList();
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                InkWell(
+                                                  child: Card(
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(50),
+                                                    ),
+                                                    child: const Padding(
+                                                      padding: EdgeInsets.all(8.0),
+                                                      child: Icon(
+                                                        Icons.add,
+                                                        size: 15,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  onTap: () {
+                                                    addToCart(
+                                                      index,
+                                                      (int.parse(_controller[index].text) + int.parse(model.qtyStepSize!)).toString(),
+                                                      2,
+                                                    );
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                          SizedBox(
+                                            width: 110,
+                                            height: 32,
+                                            child: SimBtn(
+                                              width: 1,
+                                              height: 32,
+                                              title: getTranslated(context, 'BUYNOW2'),
+                                              onBtnSelected: () async {
+                                                await addToCart(
+                                                  index,
+                                                  (int.parse(_controller[index].text) + int.parse(model.qtyStepSize!)).toString(),
+                                                  1,
+                                                  intent: true,
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ],
@@ -1773,20 +1760,122 @@ if (widget.id != null) {
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                    child: SimBtn(
-                      width: 0.9,
-                      height: 30,
-                      title: getTranslated(context, 'BUYNOW2'),
-                      onBtnSelected: () async {
-                        await addToCart(
-                          index,
-                          (int.parse(_controller[index].text) +
-                                  int.parse(model.qtyStepSize!))
-                              .toString(),
-                          1,
-                          intent: true,
-                        );
-                      },
+                    child: Wrap(
+                      spacing: 5,
+                      runSpacing: 5,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        if (_controller[index].text != "0" &&
+                            model.availability != "0" &&
+                            cartBtnList)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              InkWell(
+                                child: Card(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(50),
+                                  ),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Icon(
+                                      Icons.remove,
+                                      size: 15,
+                                    ),
+                                  ),
+                                ),
+                                onTap: () {
+                                  if (int.parse(_controller[index].text) > 0) {
+                                    removeFromCart(index);
+                                  }
+                                },
+                              ),
+                              Container(
+                                width: 37,
+                                height: 20,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.white,
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                child: Stack(
+                                  children: [
+                                    TextField(
+                                      textAlign: TextAlign.center,
+                                      readOnly: true,
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: Theme.of(context).colorScheme.fontColor),
+                                      controller: _controller[index],
+                                      decoration: const InputDecoration(
+                                        border: InputBorder.none,
+                                      ),
+                                    ),
+                                    PopupMenuButton<String>(
+                                      tooltip: '',
+                                      icon: const Icon(
+                                        Icons.arrow_drop_down,
+                                        size: 0,
+                                      ),
+                                      onSelected: (String value) {
+                                        addToCart(index, value, 2);
+                                      },
+                                      itemBuilder: (BuildContext context) {
+                                        return model.itemsCounter!.map<PopupMenuItem<String>>((String value) {
+                                          return PopupMenuItem(
+                                            value: value,
+                                            child: Text(
+                                              value,
+                                              style: TextStyle(color: Theme.of(context).colorScheme.fontColor),
+                                            ),
+                                          );
+                                        }).toList();
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              InkWell(
+                                child: Card(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(50),
+                                  ),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Icon(
+                                      Icons.add,
+                                      size: 15,
+                                    ),
+                                  ),
+                                ),
+                                onTap: () {
+                                  addToCart(
+                                    index,
+                                    (int.parse(_controller[index].text) + int.parse(model.qtyStepSize!)).toString(),
+                                    2,
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        SizedBox(
+                          width: 110,
+                          height: 32,
+                          child: SimBtn(
+                            width: 1,
+                            height: 32,
+                            title: getTranslated(context, 'BUYNOW2'),
+                            onBtnSelected: () async {
+                              await addToCart(
+                                index,
+                                (int.parse(_controller[index].text) + int.parse(model.qtyStepSize!))
+                                    .toString(),
+                                1,
+                                intent: true,
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
