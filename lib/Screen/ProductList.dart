@@ -2132,6 +2132,18 @@ class StateProduct extends State<ProductListScreen>
         setState(() {
           _isProgress = false;
         });
+    if (intent) {
+      cartTotalClear();
+      Navigator.push(
+        context,
+        CupertinoPageRoute(
+          builder: (context) => const Cart(
+            fromBottom: false,
+            buyNow: true,
+          ),
+        ),
+      );
+    }
       }
     } else {
       if (mounted) {
