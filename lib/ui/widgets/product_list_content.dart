@@ -665,6 +665,22 @@ class StateProduct extends State<ProductListContent>
                                       )
                                     else
                                       const SizedBox.shrink(),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                                      child: SimBtn(
+                                        width: 0.9,
+                                        height: 30,
+                                        title: getTranslated(context, 'BUYNOW2'),
+                                        onBtnSelected: () {
+                                          addToCart(
+                                            index,
+                                            (int.parse(_controller[index].text) + int.parse(model.qtyStepSize!)).toString(),
+                                            1,
+                                            intent: true,
+                                          );
+                                        },
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -2122,6 +2138,18 @@ if (widget.id != null) {
         setState(() {
           _isProgress = false;
         });
+    if (intent) {
+      cartTotalClear();
+      Navigator.push(
+        context,
+        CupertinoPageRoute(
+          builder: (context) => const Cart(
+            fromBottom: false,
+            buyNow: true,
+          ),
+        ),
+      );
+    }
       }
     } else {
       if (mounted) {
