@@ -892,7 +892,10 @@ class StateSection extends State<SaleSectionScreen>
                   Navigator.push(
                     context,
                     CupertinoPageRoute(
-                      builder: (context) => const Cart(fromBottom: false),
+                      builder: (context) => const Cart(
+                        fromBottom: false,
+                        buyNow: true,
+                      ),
                     ),
                   );
                 }
@@ -911,7 +914,10 @@ class StateSection extends State<SaleSectionScreen>
           Navigator.push(
             context,
             CupertinoPageRoute(
-              builder: (context) => const Cart(fromBottom: false),
+              builder: (context) => const Cart(
+                fromBottom: false,
+                buyNow: true,
+              ),
             ),
           );
         }

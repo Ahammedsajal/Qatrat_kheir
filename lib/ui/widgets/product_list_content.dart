@@ -937,7 +937,10 @@ class StateProduct extends State<ProductListContent>
               Navigator.push(
                 context,
                 CupertinoPageRoute(
-                  builder: (context) => const Cart(fromBottom: false),
+                  builder: (context) => const Cart(
+                    fromBottom: false,
+                    buyNow: true,
+                  ),
                 ),
               );
             }

@@ -224,7 +224,10 @@ class StateFlashList extends State<FlashProductList>
                   Navigator.push(
                     context,
                     CupertinoPageRoute(
-                      builder: (context) => const Cart(fromBottom: false),
+                      builder: (context) => const Cart(
+                        fromBottom: false,
+                        buyNow: true,
+                      ),
                     ),
                   );
                 }
@@ -291,7 +294,10 @@ class StateFlashList extends State<FlashProductList>
             Navigator.push(
               context,
               CupertinoPageRoute(
-                builder: (context) => const Cart(fromBottom: false),
+                builder: (context) => const Cart(
+                  fromBottom: false,
+                  buyNow: true,
+                ),
               ),
             );
           }
