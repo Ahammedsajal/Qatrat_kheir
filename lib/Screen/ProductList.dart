@@ -674,16 +674,33 @@ class StateProduct extends State<ProductListScreen>
                                             const SizedBox.shrink(),
                                       Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                                        child: SimBtn(
-                                          width: 0.9,
-                                          height: 30,
-                                          title: getTranslated(context, 'BUYNOW2'),
-                                          onBtnSelected: () {
-                                            addToCart(
-                                              index,
-                                              (int.parse(_controller[index].text) + int.parse(model.qtyStepSize!)).toString(),
-                                              1,
-                                              intent: true,
+                                        child: LayoutBuilder(
+                                          builder: (context, constraints) {
+                                            return SizedBox(
+                                              width: constraints.maxWidth * 0.2,
+                                              height: 30,
+                                              child: TextButton(
+                                                style: TextButton.styleFrom(
+                                                  padding: EdgeInsets.zero,
+                                                  backgroundColor: Theme.of(context).colorScheme.primarytheme,
+                                                ),
+                                                onPressed: () {
+                                                  addToCart(
+                                                    index,
+                                                    (int.parse(_controller[index].text) + int.parse(model.qtyStepSize!)).toString(),
+                                                    1,
+                                                    intent: true,
+                                                  );
+                                                },
+                                                child: Text(
+                                                  getTranslated(context, 'BUYNOW2'),
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                                                        color: colors.whiteTemp,
+                                                        fontWeight: FontWeight.normal,
+                                                      ),
+                                                ),
+                                              ),
                                             );
                                           },
                                         ),
