@@ -392,18 +392,18 @@ class _QatarMosquesState extends State<QatarMosques> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(ctx),
             child: Text(getTranslated(ctx, "CANCEL")!),
           ),
           ElevatedButton(
             onPressed: () {
-              context.read<MosqueProvider>().setSelectedMosque(mosque);
+              ctx.read<MosqueProvider>().setSelectedMosque(mosque);
 
               if (widget.isFromCheckout) {
-                Navigator.pop(context);
-                Navigator.pop(context, mosque);
+                Navigator.pop(ctx);
+                Navigator.pop(ctx, mosque);
               } else {
-                Navigator.pop(context);
+                Navigator.pop(ctx);
                 _showProductsDialog();
               }
             },
