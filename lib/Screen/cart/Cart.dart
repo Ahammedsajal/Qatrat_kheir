@@ -2222,7 +2222,9 @@ buildConvertedPrice(
               });
               if (widget.buyNow) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  checkout();
+                  checkout().then((_) {
+                    if (mounted) Navigator.pop(context);
+                  });
                 });
               }
             }
@@ -2301,7 +2303,9 @@ buildConvertedPrice(
                   });
                   if (widget.buyNow) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      checkout();
+                      checkout().then((_) {
+                        if (mounted) Navigator.pop(context);
+                      });
                     });
                   }
                 }
@@ -2327,7 +2331,9 @@ buildConvertedPrice(
         });
         if (widget.buyNow) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            checkout();
+            checkout().then((_) {
+              if (mounted) Navigator.pop(context);
+            });
           });
         }
       }
@@ -3825,7 +3831,7 @@ buildConvertedPrice(
       });
     }
 
-  checkout() {
+  Future<void> checkout() async {
   final List<SectionModel> cartList = context.read<CartProvider>().cartList;
   print("cartList*****${cartList.length}");
   deviceHeight = MediaQuery.of(context).size.height;
@@ -3842,7 +3848,7 @@ buildConvertedPrice(
     checkDeliverable(2);
   }
 
-  return showModalBottomSheet(
+  await showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
