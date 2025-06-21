@@ -374,14 +374,32 @@ final phoneWithCode = mobileController.text.trim();
 
                 }
               } else {
-                Navigator.pushAndRemoveUntil(context,
-                    BlurredRouter(builder: (BuildContext context) {
-                  Dashboard.dashboardScreenKey = GlobalKey<HomePageState>();
-                  return widget.classType ??
-                      Dashboard(
-                        key: Dashboard.dashboardScreenKey,
-                      );
-                },), (route) => false,);
+                if (widget.classType != null) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        Dashboard.dashboardScreenKey =
+                            GlobalKey<HomePageState>();
+                        return widget.classType!;
+                      },
+                    ),
+                  );
+                } else {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    BlurredRouter(
+                      builder: (BuildContext context) {
+                        Dashboard.dashboardScreenKey =
+                            GlobalKey<HomePageState>();
+                        return Dashboard(
+                          key: Dashboard.dashboardScreenKey,
+                        );
+                      },
+                    ),
+                    (route) => false,
+                  );
+                }
               }
             });
           });
@@ -1169,14 +1187,32 @@ Widget build(BuildContext context) {
                   });
                 }
               } else {
-                Navigator.pushAndRemoveUntil(context,
-                    MaterialPageRoute(builder: (BuildContext context) {
-                  Dashboard.dashboardScreenKey = GlobalKey<HomePageState>();
-                  return widget.classType ??
-                      Dashboard(
-                        key: Dashboard.dashboardScreenKey,
-                      );
-                },), (route) => false,);
+                if (widget.classType != null) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        Dashboard.dashboardScreenKey =
+                            GlobalKey<HomePageState>();
+                        return widget.classType!;
+                      },
+                    ),
+                  );
+                } else {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        Dashboard.dashboardScreenKey =
+                            GlobalKey<HomePageState>();
+                        return Dashboard(
+                          key: Dashboard.dashboardScreenKey,
+                        );
+                      },
+                    ),
+                    (route) => false,
+                  );
+                }
               }
             });
           });
