@@ -296,7 +296,7 @@ class _QatarMosquesState extends State<QatarMosques> {
                                   _currentPosition!.latitude,
                                   _currentPosition!.longitude,
                                 ),
-                                builder: (ctx) => const Icon(
+                                child: const Icon(
                                   Icons.my_location,
                                   color: Colors.blue,
                                   size: 40,
@@ -311,7 +311,7 @@ class _QatarMosquesState extends State<QatarMosques> {
                               width: 40,
                               height: 40,
                               point: LatLng(mosque.latitude, mosque.longitude),
-                              builder: (ctx) => GestureDetector(
+                              child: GestureDetector(
                                 onTap: () => _showConfirmationDialog(context, mosque),
                                 child: Icon(
                                   Icons.location_on,
@@ -347,6 +347,7 @@ class _QatarMosquesState extends State<QatarMosques> {
   }
 
   void _showConfirmationDialog(BuildContext context, MosqueModel mosque) {
+      debugPrint('dialog builder reached'); 
   final isArabic = Localizations.localeOf(context).languageCode == "ar";
 
   showDialog(
