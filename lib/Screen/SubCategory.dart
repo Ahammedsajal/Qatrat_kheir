@@ -76,13 +76,9 @@ class SubCategoryScreen extends StatelessWidget {
       onTap: () {
         if (subList![index].subList == null ||
             subList![index].subList!.isEmpty) {
-          Navigator.pushNamed(context, Routers.productListScreen, arguments: {
+          Navigator.pushNamed(context, Routers.categoryProductsScreen, arguments: {
             "name": subList![index].name,
             "id": subList![index].id,
-            "tag": false,
-            "fromSeller": false,
-            "maxDis": maxDis,
-            "minDis": minDis,
           },);
         } else {
           Navigator.push(

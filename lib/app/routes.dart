@@ -13,6 +13,7 @@ import 'package:customer/Screen/Product_DetailNew.dart';
 import 'package:customer/Screen/PromoCode.dart';
 import 'package:customer/Screen/Sale_Section.dart';
 import 'package:customer/Screen/Search.dart';
+import 'package:customer/Screen/category_products.dart';
 import 'package:customer/Screen/SendOtp.dart';
 import 'package:customer/Screen/Set_Password.dart';
 import 'package:customer/Screen/SignUp.dart';
@@ -43,6 +44,7 @@ class Routers {
   static const String qatarMosquesScreen = "/qatarMosques";
   static const String wateringFeedingScreen = "/wateringFeeding";
   static const String iftarScreen = "/iftar";
+  static const String categoryProductsScreen = "/categoryProducts";
 
   static const String introSliderScreen = "/introSliderScreen";
   static const String notificationListScreen = "/notificationListScreen";
@@ -149,6 +151,17 @@ case iftarScreen:
         return SignUp.route(routeSettings);
       case faqProductScreen:
         return FaqsProduct.route(routeSettings);
+     case categoryProductsScreen:
+  final Map? arguments = routeSettings.arguments as Map?;
+  return MaterialPageRoute(
+    builder: (context) => BlocProvider<FetchMosquesCubit>(
+      create: (_) => FetchMosquesCubit()..fetchMosques(),
+      child: CategoryProducts(
+        id: arguments?['id'],
+        title: arguments?['name'] ?? '',
+      ),
+    ),
+  );
      case productListScreen:
   final Map? arguments = routeSettings.arguments as Map?;
   return MaterialPageRoute(
