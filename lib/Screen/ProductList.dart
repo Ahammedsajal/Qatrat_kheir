@@ -685,12 +685,29 @@ class StateProduct extends State<ProductListScreen>
                                                   backgroundColor: Theme.of(context).colorScheme.primarytheme,
                                                 ),
                                                 onPressed: () {
-                                                  addToCart(
-                                                    index,
-                                                    (int.parse(_controller[index].text) + int.parse(model.qtyStepSize!)).toString(),
-                                                    1,
-                                                    intent: true,
-                                                  );
+                                                  final String userId = context.read<UserProvider>().userId;
+                                                  if (userId.isEmpty) {
+                                                    addToCart(
+                                                      index,
+                                                      (int.parse(_controller[index].text) + int.parse(model.qtyStepSize!)).toString(),
+                                                      1,
+                                                    );
+                                                    Navigator.pushNamed(
+                                                      context,
+                                                      Routers.loginScreen,
+                                                      arguments: {
+                                                        "isPop": false,
+                                                        "classType": const Cart(fromBottom: false, buyNow: true),
+                                                      },
+                                                    );
+                                                  } else {
+                                                    addToCart(
+                                                      index,
+                                                      (int.parse(_controller[index].text) + int.parse(model.qtyStepSize!)).toString(),
+                                                      1,
+                                                      intent: true,
+                                                    );
+                                                  }
                                                 },
                                                 child: Text(
                                                   getTranslated(context, 'BUYNOW2'),
@@ -1808,14 +1825,33 @@ class StateProduct extends State<ProductListScreen>
                         height: 28,
                         title: getTranslated(context, 'BUYNOW2'),
                         onBtnSelected: () async {
-                          await addToCart(
-                            index,
-                            (int.parse(_controller[index].text) +
-                                    int.parse(model.qtyStepSize!))
-                                .toString(),
-                            1,
-                            intent: true,
-                          );
+                          final String userId = context.read<UserProvider>().userId;
+                          if (userId.isEmpty) {
+                            await addToCart(
+                              index,
+                              (int.parse(_controller[index].text) +
+                                      int.parse(model.qtyStepSize!))
+                                  .toString(),
+                              1,
+                            );
+                            Navigator.pushNamed(
+                              context,
+                              Routers.loginScreen,
+                              arguments: {
+                                "isPop": false,
+                                "classType": const Cart(fromBottom: false, buyNow: true),
+                              },
+                            );
+                          } else {
+                            await addToCart(
+                              index,
+                              (int.parse(_controller[index].text) +
+                                      int.parse(model.qtyStepSize!))
+                                  .toString(),
+                              1,
+                              intent: true,
+                            );
+                          }
                         },
                       ),
                     ),
