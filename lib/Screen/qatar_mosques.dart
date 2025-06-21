@@ -4,11 +4,18 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../Provider/UserProvider.dart';
+import '../Provider/SettingProvider.dart';
+import '../Helper/ApiBaseHelper.dart';
+import '../Helper/String.dart';
+import '../Screen/SkipCashWebView.dart';
+import '../settings.dart';
 import '../cubits/FetchMosquesCubit.dart';
 import '../Model/MosqueModel.dart';
 import '../Provider/MosqueProvider.dart';
 import '../Helper/Session.dart';
-import 'MostNeededMosquesFromMap.dart';
 
 class QatarMosques extends StatefulWidget {
   final bool isFromCheckout;
@@ -27,6 +34,9 @@ class _QatarMosquesState extends State<QatarMosques> {
   List<MosqueModel> _mosqueSuggestions = [];
   List<String> _areaSuggestions = [];
 
+  late final List<DateTime> _availableDates;
+  late DateTime _selectedDate;
+
   final List<String> qatarAreaList = [
     "Gharaffa", "Al Wakra", "Muaither", "Al Rayyan", "Doha", "Al Sadd",
     "Al Gharafa", "Al Duhail", "Umm Salal", "Al Khor", "Mesaieed",
@@ -38,6 +48,53 @@ class _QatarMosquesState extends State<QatarMosques> {
     super.initState();
     _mapController = MapController();
     _getCurrentLocation();
+    _availableDates =
+        List.generate(5, (i) => DateTime.now().add(Duration(days: i + 2)));
+    _selectedDate = _availableDates.first;
+  }
+
+  Widget _buildDateSelector() {
+    return SizedBox(
+      height: 70,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _availableDates.length,
+        itemBuilder: (context, index) {
+          final date = _availableDates[index];
+          final selected = _selectedDate == date;
+          return GestureDetector(
+            onTap: () => setState(() => _selectedDate = date),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: selected
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                    color: Theme.of(context).colorScheme.primary),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    DateFormat('EEE').format(date),
+                    style: TextStyle(
+                        color: selected ? Colors.white : null),
+                  ),
+                  Text(
+                    DateFormat('dd/MM').format(date),
+                    style: TextStyle(
+                        color: selected ? Colors.white : null),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Future<void> _getCurrentLocation() async {
@@ -321,6 +378,8 @@ class _QatarMosquesState extends State<QatarMosques> {
                 const SizedBox(height: 12),
                 Text(getTranslated(context, "COORDINATES")!, style: const TextStyle(fontWeight: FontWeight.bold)),
                 Text("(${mosque.latitude}, ${mosque.longitude})"),
+                const SizedBox(height: 12),
+                _buildDateSelector(),
               ],
             ),
           ),
@@ -339,16 +398,7 @@ class _QatarMosquesState extends State<QatarMosques> {
                 Navigator.pop(context, mosque);
               } else {
                 Navigator.pop(context);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => MostNeededMosquesFromMap(
-                      mosques: (context.read<FetchMosquesCubit>().state is FetchMosquesSuccess)
-                          ? (context.read<FetchMosquesCubit>().state as FetchMosquesSuccess).mosques
-                          : [],
-                    ),
-                  ),
-                );
+                _showProductsDialog();
               }
             },
             child: Text(getTranslated(context, "CONFIRM")!),
@@ -358,5 +408,107 @@ class _QatarMosquesState extends State<QatarMosques> {
     },
   );
 }
+
+  void _showProductsDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(getTranslated(context, 'MOST_NEEDED_PRODUCTS') ?? 'Products'),
+          content: SizedBox(
+            height: 200,
+            width: double.maxFinite,
+            child: ListView(
+              children: const [
+                ListTile(title: Text('Product 1')),
+                ListTile(title: Text('Product 2')),
+                ListTile(title: Text('Product 3')),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(getTranslated(context, 'CANCEL') ?? 'Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: _handleBuyNow,
+              child: Text(getTranslated(context, 'BUYNOW2') ?? 'Buy Now'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _handleBuyNow() {
+    final userProvider = context.read<UserProvider>();
+    if (userProvider.mobile.isEmpty) {
+      Navigator.pop(context);
+      _showEnterMobileDialog();
+    } else {
+      Navigator.pop(context);
+      _openSkipCash();
+    }
+  }
+
+  void _showEnterMobileDialog() {
+    final TextEditingController mobileCtrl = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(getTranslated(context, 'ENTER_MOBILE_NUMBER') ?? 'Enter mobile number'),
+          content: TextField(
+            controller: mobileCtrl,
+            keyboardType: TextInputType.phone,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(getTranslated(context, 'CANCEL') ?? 'Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final mobile = mobileCtrl.text.trim();
+                if (mobile.isNotEmpty) {
+                  await _updateMobile(mobile);
+                  Navigator.pop(ctx);
+                  _openSkipCash();
+                }
+              },
+              child: Text(getTranslated(context, 'CONFIRM') ?? 'Confirm'),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _updateMobile(String mobile) async {
+    final userProvider = context.read<UserProvider>();
+    final settingProvider = context.read<SettingProvider>();
+    final api = ApiBaseHelper();
+    final params = {USER_ID: userProvider.userId, MOBILE: mobile};
+    final res = await api.postAPICall(getUpdateUserApi, params);
+    if (res['error'] == false) {
+      settingProvider.setPrefrence(MOBILE, mobile);
+      userProvider.setMobile(mobile);
+    }
+  }
+
+  void _openSkipCash() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SkipCashWebView(
+          payUrl: '${AppSettings.baseUrl}skipcash',
+          paymentId: '',
+          onSuccess: (_) async {},
+          onError: (_) {},
+        ),
+      ),
+    );
+  }
 
 }
