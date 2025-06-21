@@ -347,41 +347,42 @@ class _QatarMosquesState extends State<QatarMosques> {
   }
 
   void _showConfirmationDialog(BuildContext context, MosqueModel mosque) {
-      debugPrint('dialog builder reached'); 
-  final isArabic = Localizations.localeOf(context).languageCode == "ar";
+    debugPrint('dialog builder reached');
 
-  showDialog(
-    context: context,
-    builder: (ctx) {
-      return AlertDialog(
-        title: Text(getTranslated(context, "CONFIRM_MOSQUE_TITLE")!),
-        content: Card(
-          elevation: 3,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(getTranslated(context, "MOSQUE_ID")!, style: const TextStyle(fontWeight: FontWeight.bold)),
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        final isArabic = Localizations.localeOf(ctx).languageCode == "ar";
+
+        return AlertDialog(
+          title: Text(getTranslated(ctx, "CONFIRM_MOSQUE_TITLE")!),
+          content: Card(
+            elevation: 3,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                Text(getTranslated(ctx, "MOSQUE_ID")!, style: const TextStyle(fontWeight: FontWeight.bold)),
                 Text(mosque.id),
                 const SizedBox(height: 12),
-                Text(getTranslated(context, "MOSQUE_NAME")!, style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(getTranslated(ctx, "MOSQUE_NAME")!, style: const TextStyle(fontWeight: FontWeight.bold)),
                 Text(
                   isArabic
                       ? (mosque.nameAr?.isNotEmpty ?? false ? mosque.nameAr! : mosque.name)
                       : mosque.name,
                 ),
                 const SizedBox(height: 12),
-                Text(getTranslated(context, "ADDRESS")!, style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(getTranslated(ctx, "ADDRESS")!, style: const TextStyle(fontWeight: FontWeight.bold)),
                 Text(
                   isArabic
-                      ? (mosque.addressAr?.isNotEmpty ?? false ? mosque.addressAr! : getTranslated(context, "NO_ADDRESS")!)
-                      : (mosque.address?.isNotEmpty ?? false ? mosque.address! : getTranslated(context, "NO_ADDRESS")!),
+                      ? (mosque.addressAr?.isNotEmpty ?? false ? mosque.addressAr! : getTranslated(ctx, "NO_ADDRESS")!)
+                      : (mosque.address?.isNotEmpty ?? false ? mosque.address! : getTranslated(ctx, "NO_ADDRESS")!),
                 ),
                 const SizedBox(height: 12),
-                Text(getTranslated(context, "COORDINATES")!, style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(getTranslated(ctx, "COORDINATES")!, style: const TextStyle(fontWeight: FontWeight.bold)),
                 Text("(${mosque.latitude}, ${mosque.longitude})"),
                 const SizedBox(height: 12),
                 _buildDateSelector(),
@@ -392,7 +393,7 @@ class _QatarMosquesState extends State<QatarMosques> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(getTranslated(context, "CANCEL")!),
+            child: Text(getTranslated(ctx, "CANCEL")!),
           ),
           ElevatedButton(
             onPressed: () {
@@ -406,13 +407,13 @@ class _QatarMosquesState extends State<QatarMosques> {
                 _showProductsDialog();
               }
             },
-            child: Text(getTranslated(context, "CONFIRM")!),
+            child: Text(getTranslated(ctx, "CONFIRM")!),
           ),
         ],
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
   void _showProductsDialog() {
     showDialog(
