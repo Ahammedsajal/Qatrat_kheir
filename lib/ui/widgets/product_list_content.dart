@@ -650,19 +650,40 @@ class StateProduct extends State<ProductListContent>
                                            SizedBox(
                                             width: 110,
                                             height: 32,
-                                            child: SimBtn(
-                                              width: 1,
-                                              height: 32,
-                                              title: getTranslated(context, 'BUYNOW2'),
-                                              onBtnSelected: () async {
+                                          child: SimBtn(
+                                            width: 1,
+                                            height: 32,
+                                            title: getTranslated(context, 'BUYNOW2'),
+                                            onBtnSelected: () async {
+                                              final String userId = context.read<UserProvider>().userId;
+                                              if (userId.isEmpty) {
                                                 await addToCart(
                                                   index,
-                                                  (int.parse(_controller[index].text) + int.parse(model.qtyStepSize!)).toString(),
+                                                  (int.parse(_controller[index].text) +
+                                                          int.parse(model.qtyStepSize!))
+                                                      .toString(),
+                                                  1,
+                                                );
+                                                Navigator.pushNamed(
+                                                  context,
+                                                  Routers.loginScreen,
+                                                  arguments: {
+                                                    "isPop": false,
+                                                    "classType": const Cart(fromBottom: false, buyNow: true),
+                                                  },
+                                                );
+                                              } else {
+                                                await addToCart(
+                                                  index,
+                                                  (int.parse(_controller[index].text) +
+                                                          int.parse(model.qtyStepSize!))
+                                                      .toString(),
                                                   1,
                                                   intent: true,
                                                 );
-                                              },
-                                            ),
+                                              }
+                                            },
+                                          ),
                                           ),
                                         ],
                                       ),
@@ -1864,13 +1885,33 @@ if (widget.id != null) {
                             height: 32,
                             title: getTranslated(context, 'BUYNOW2'),
                             onBtnSelected: () async {
-                              await addToCart(
-                                index,
-                                (int.parse(_controller[index].text) + int.parse(model.qtyStepSize!))
-                                    .toString(),
-                                1,
-                                intent: true,
-                              );
+                              final String userId = context.read<UserProvider>().userId;
+                              if (userId.isEmpty) {
+                                await addToCart(
+                                  index,
+                                  (int.parse(_controller[index].text) +
+                                          int.parse(model.qtyStepSize!))
+                                      .toString(),
+                                  1,
+                                );
+                                Navigator.pushNamed(
+                                  context,
+                                  Routers.loginScreen,
+                                  arguments: {
+                                    "isPop": false,
+                                    "classType": const Cart(fromBottom: false, buyNow: true),
+                                  },
+                                );
+                              } else {
+                                await addToCart(
+                                  index,
+                                  (int.parse(_controller[index].text) +
+                                          int.parse(model.qtyStepSize!))
+                                      .toString(),
+                                  1,
+                                  intent: true,
+                                );
+                              }
                             },
                           ),
                         ),
