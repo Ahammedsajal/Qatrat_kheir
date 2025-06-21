@@ -710,7 +710,7 @@ class StateProduct extends State<ProductListScreen>
                                                   }
                                                 },
                                                 child: Text(
-                                                  getTranslated(context, 'BUYNOW2'),
+                                                  getTranslated(context, 'BUYNOW2') ?? '',
                                                   overflow: TextOverflow.ellipsis,
                                                   style: Theme.of(context).textTheme.titleMedium!.copyWith(
                                                         color: colors.whiteTemp,
