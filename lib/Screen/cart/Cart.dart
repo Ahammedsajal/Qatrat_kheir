@@ -4,7 +4,8 @@
   import 'package:collection/src/iterable_extensions.dart';
 import 'package:flutter/services.dart';
   // At the top of Cart.dart
-import 'package:customer/Screen/Payment.dart' hide isTimeSlot;
+// import removed because payment selection screen is no longer used
+// import 'package:customer/Screen/Payment.dart' hide isTimeSlot;
 import 'package:customer/Screen/SkipCashWebView.dart';
 import 'package:logging/logging.dart';
   import 'package:crypto/crypto.dart';
@@ -19,11 +20,12 @@ import 'package:logging/logging.dart';
   import 'package:flutter/cupertino.dart';
   import 'package:flutter/material.dart';
   import 'package:flutter_svg/flutter_svg.dart';
-  import 'package:flutter_svg/svg.dart';
-  import 'package:http/http.dart' as http;
-  import 'package:http_parser/http_parser.dart';
-  import 'package:mime/mime.dart';
-  import 'package:my_fatoorah/my_fatoorah.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
+import 'package:my_fatoorah/my_fatoorah.dart';
+import 'package:intl/intl.dart';
   import 'package:provider/provider.dart';
   import '../../Helper/ApiBaseHelper.dart';
   import '../../Helper/Color.dart';
@@ -36,11 +38,12 @@ import 'package:customer/Helper/String.dart' hide currencySymbol;
   import '../../Provider/MyFatoraahPaymentProvider.dart';
   import '../../ui/styles/DesignConfig.dart';
   import '../../ui/styles/Validators.dart';
-  import '../../ui/widgets/AppBtn.dart';
-  import '../../ui/widgets/DiscountLabel.dart';
-  import '../../ui/widgets/SimBtn.dart';
-  import '../../ui/widgets/SimpleAppBar.dart';
-  import '../../ui/widgets/Stripe_Service.dart';
+import '../../ui/widgets/AppBtn.dart';
+import '../../ui/widgets/DiscountLabel.dart';
+import '../../ui/widgets/SimBtn.dart';
+import '../../ui/widgets/SimpleAppBar.dart';
+import '../../ui/widgets/Stripe_Service.dart';
+import '../../ui/widgets/PaymentRadio.dart';
   import '../HomePage.dart';
   import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../utils/Hive/hive_utils.dart';
@@ -55,7 +58,8 @@ import '../../utils/Hive/hive_utils.dart';
 
   class Cart extends StatefulWidget {
     final bool fromBottom;
-    const Cart({super.key, required this.fromBottom});
+    final bool buyNow;
+    const Cart({super.key, required this.fromBottom, this.buyNow = false});
     @override
     State<StatefulWidget> createState() => StateCart();
   }
@@ -104,11 +108,16 @@ import '../../utils/Hive/hive_utils.dart';
     List<String> productIds = [];
     List<String> proVarIds = [];
     DatabaseHelper db = DatabaseHelper();
-    final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
     bool isAvailable = true;
-    bool confDia = true;
     String razorpayOrderId = '';
     String? rozorpayMsg;
+    // ───────────────────────────────
+    // Time slot related variables (moved from Payment screen)
+    List<Model> timeSlotList = [];
+    List<RadioModel> timeModel = [];
+    String? startingDate;
+    String? allowDay;
+    bool _isTimeSlotLoading = true;
     @override
     void setState(VoidCallback fn) {
       if (mounted) {
@@ -2211,6 +2220,13 @@ buildConvertedPrice(
               setState(() {
                 _isCartLoad = false;
               });
+              if (widget.buyNow) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  checkout().then((_) {
+                    if (mounted) Navigator.pop(context);
+                  });
+                });
+              }
             }
           },
           onError: (error) {
@@ -2285,6 +2301,13 @@ buildConvertedPrice(
                   setState(() {
                     _isCartLoad = false;
                   });
+                  if (widget.buyNow) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      checkout().then((_) {
+                        if (mounted) Navigator.pop(context);
+                      });
+                    });
+                  }
                 }
               },
               onError: (error) {
@@ -2306,6 +2329,13 @@ buildConvertedPrice(
         setState(() {
           _isCartLoad = false;
         });
+        if (widget.buyNow) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            checkout().then((_) {
+              if (mounted) Navigator.pop(context);
+            });
+          });
+        }
       }
     }
 
@@ -3801,11 +3831,15 @@ buildConvertedPrice(
       });
     }
 
-   checkout() {
+  Future<void> checkout() async {
   final List<SectionModel> cartList = context.read<CartProvider>().cartList;
   print("cartList*****${cartList.length}");
   deviceHeight = MediaQuery.of(context).size.height;
   deviceWidth = MediaQuery.of(context).size.width;
+
+  // Ensure SkipCash is the selected payment method and fetch time slots
+  paymentMethod = getTranslated(context, 'SKIPCASH_LBL');
+  _getdateTime();
 
   if (isStorePickUp == "false" &&
       addressList.isNotEmpty &&
@@ -3814,7 +3848,7 @@ buildConvertedPrice(
     checkDeliverable(2);
   }
 
-  return showModalBottomSheet(
+  await showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
@@ -3911,83 +3945,22 @@ buildConvertedPrice(
 
                                                   if (paymentMethod == null || paymentMethod!.isEmpty) {
                                                     msg = getTranslated(context, 'payWarning');
-                                                    Navigator.pushNamed(
-                                                      context,
-                                                      Routers.paymentScreen,
-                                                      arguments: {
-                                                        "update": updateCheckout,
-                                                        "msg": msg,
-                                                      },
-                                                    ).then((value) async {
-                                                      if (cartList[0].productList![0].productType !=
-                                                              'digital_product' &&
-                                                          isStorePickUp == "false" &&
-                                                          !deliverable) {
-                                                        await checkDeliverable(2, showErrorMessage: false);
-                                                      }
-                                                      checkoutState?.call(() {
-                                                        _placeOrder = true;
-                                                      });
+                                                    setSnackbar(msg!, context);
+                                                    checkoutState?.call(() {
+                                                      _placeOrder = true;
                                                     });
                                                     return;
                                                   }
 
-                                                  if (cartList[0].productList![0].productType !=
-                                                          'digital_product' &&
-                                                      isTimeSlot! &&
-                                                      (isLocalDelCharge == null || isLocalDelCharge!) &&
-                                                      int.parse(allowDay!) > 0 &&
-                                                      (selDate == null || selDate!.isEmpty) &&
-                                                      IS_LOCAL_ON != '0') {
-                                                    msg = getTranslated(context, 'dateWarning');
-                                                    Navigator.pushNamed(
-                                                      context,
-                                                      Routers.paymentScreen,
-                                                      arguments: {
-                                                        "update": updateCheckout,
-                                                        "msg": msg,
-                                                      },
-                                                    ).then((value) async {
-                                                      if (cartList[0].productList![0].productType !=
-                                                              'digital_product' &&
-                                                          isStorePickUp == "false" &&
-                                                          !deliverable) {
-                                                        await checkDeliverable(2, showErrorMessage: false);
-                                                      }
-                                                      checkoutState?.call(() {
-                                                        _placeOrder = true;
-                                                      });
-                                                    });
-                                                    return;
+                                                  if ((selDate == null || selDate!.isEmpty) && startingDate != null) {
+                                                    final DateTime first = DateTime.parse(startingDate!);
+                                                    selDate = DateFormat('yyyy-MM-dd').format(first);
+                                                    selectedDate ??= 0;
                                                   }
 
-                                                  if (cartList[0].productList![0].productType !=
-                                                          'digital_product' &&
-                                                      isTimeSlot! &&
-                                                      (isLocalDelCharge == null || isLocalDelCharge!) &&
-                                                      timeSlotList.isNotEmpty &&
-                                                      (selTime == null || selTime!.isEmpty) &&
-                                                      IS_LOCAL_ON != '0') {
-                                                    msg = getTranslated(context, 'timeWarning');
-                                                    Navigator.pushNamed(
-                                                      context,
-                                                      Routers.paymentScreen,
-                                                      arguments: {
-                                                        "update": updateCheckout,
-                                                        "msg": msg,
-                                                      },
-                                                    ).then((value) async {
-                                                      if (cartList[0].productList![0].productType !=
-                                                              'digital_product' &&
-                                                          isStorePickUp == "false" &&
-                                                          !deliverable) {
-                                                        await checkDeliverable(2, showErrorMessage: false);
-                                                      }
-                                                      checkoutState?.call(() {
-                                                        _placeOrder = true;
-                                                      });
-                                                    });
-                                                    return;
+                                                  if ((selTime == null || selTime!.isEmpty) && timeSlotList.isNotEmpty) {
+                                                    selTime = timeSlotList[0].name;
+                                                    selectedTime ??= 0;
                                                   }
 
                                                   if (double.parse(MIN_ALLOW_CART_AMT!) > originalPrice) {
@@ -4003,14 +3976,36 @@ buildConvertedPrice(
                                                     return;
                                                   }
 
-                                                 if (confDia) {
-                                                    if (!context.read<CartProvider>().isProgress) {
-                                                      confirmDialog(cartList);
-                                                      setState(() {
-                                                        confDia = false;
-                                                      });
-                                                    }
-                                                  } 
+                                                 if (!context.read<CartProvider>().isProgress) {
+                                                   if (cartList[0].productList![0].productType ==
+                                                       'digital_product') {
+                                                     if (mobileController.text.trim().isEmpty) {
+                                                       setSnackbar(
+                                                         getTranslated(context, 'MOBILE_REQUIRED') ??
+                                                             'Mobile number is required',
+                                                         context,
+                                                       );
+                                                       checkoutState?.call(() {
+                                                         _placeOrder = true;
+                                                       });
+                                                       return;
+                                                     }
+
+                                                     final String? emailError = validateEmail(
+                                                       emailController.text.trim(),
+                                                       getTranslated(context, 'EMAIL_REQUIRED'),
+                                                       getTranslated(context, 'VALID_EMAIL'),
+                                                     );
+                                                     if (emailError != null) {
+                                                       setSnackbar(emailError, context);
+                                                       checkoutState?.call(() {
+                                                         _placeOrder = true;
+                                                       });
+                                                       return;
+                                                     }
+                                                   }
+                                                   placeOrder('');
+                                                 }
                                                 },
                                               ),
                                             ),
@@ -5132,7 +5127,7 @@ Widget address() {
                 ],
               ),
             ),
-
+ const SizedBox(height: 16),
           // Mobile Number Input Container added below the address section:
          TextField(
             controller: mobileController,
@@ -5190,56 +5185,59 @@ Widget address() {
 
 
 
+    // Payment section now directly shows SkipCash as the only option
+    // along with date & time selection widgets.
     payment() {
       return Card(
         elevation: 1,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(4),
-          onTap: () {
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).removeCurrentSnackBar();
-            }
-            msg = '';
-            Navigator.pushNamed(
-              context,
-              Routers.paymentScreen,
-              arguments: {"update": updateCheckout, "msg": msg},
-            ).then((value) {
-              checkDeliverable(2, showErrorMessage: false);
-            });
-            if (mounted) checkoutState?.call(() {});
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.payment),
-                    Padding(
-                      padding: const EdgeInsetsDirectional.only(start: 8.0),
-                      child: Text(
-                        getTranslated(context, 'SELECT_PAYMENT')!,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.fontColor,
-                          fontWeight: FontWeight.bold,
-                        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.payment),
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(start: 8.0),
+                    child: Text(
+                      getTranslated(context, 'PAYMENT')!,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.fontColor,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ],
-                ),
-                if (paymentMethod != null && paymentMethod != '')
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [const Divider(), Text(paymentMethod!)],
+                  ),
+                  const Spacer(),
+                  Text(getTranslated(context, 'SKIPCASH_LBL')!),
+                ],
+              ),
+              const Divider(),
+              if (_isTimeSlotLoading)
+                const SizedBox(height: 50, child: Center(child: CircularProgressIndicator()))
+              else if (isTimeSlot == true)
+                Column(
+                  children: [
+                    SizedBox(
+                      height: 100,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: int.parse(allowDay ?? '0'),
+                        itemBuilder: (context, index) => dateCell(index),
+                      ),
                     ),
-                  )
-                else
-                  const SizedBox.shrink(),
-              ],
-            ),
+                    const Divider(),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: timeModel.length,
+                      itemBuilder: (context, index) => timeSlotItem(index),
+                    ),
+                  ],
+                )
+              else
+                const SizedBox.shrink(),
+            ],
           ),
         ),
       );
@@ -5526,385 +5524,6 @@ Widget address() {
       }
     }
 
-    bool validateAndSave() {
-      final form = _formkey.currentState!;
-      form.save();
-      if (form.validate()) {
-        return true;
-      }
-      return false;
-    }
-
-   void confirmDialog(List<SectionModel> cartList) {
-  showGeneralDialog(
-    barrierColor: Theme.of(context).colorScheme.black.withOpacity(0.5),
-    transitionBuilder: (context, a1, a2, widget) {
-      return Transform.scale(
-        scale: a1.value,
-        child: Opacity(
-          opacity: a1.value,
-          child: AlertDialog(
-            contentPadding: EdgeInsets.zero,
-            elevation: 2.0,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(5.0)),
-            ),
-            content: Form(
-              key: _formkey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20.0, 20.0, 0, 2.0),
-                    child: Text(
-                      getTranslated(context, 'CONFIRM_ORDER')!,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium!
-                          .copyWith(
-                            color: Theme.of(context).colorScheme.fontColor,
-                          ),
-                    ),
-                  ),
-                  Divider(
-                    color: Theme.of(context).colorScheme.lightBlack,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20.0, 0, 20.0, 0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              getTranslated(context, 'SUBTOTAL')!,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall!
-                                  .copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .lightBlack2,
-                                  ),
-                            ),
-                            buildConvertedPrice(
-                              context,
-                              originalPrice,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall!
-                                  .copyWith(
-                                    color:
-                                        Theme.of(context).colorScheme.fontColor,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                          ],
-                        ),
-                        if (cartList[0].productList![0].productType !=
-                            'digital_product')
-                          if (isStorePickUp == "false")
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  getTranslated(context, 'DELIVERY_CHARGE')!,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall!
-                                      .copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .lightBlack2,
-                                      ),
-                                ),
-                                buildConvertedPrice(
-                                  context,
-                                  deliveryCharge,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall!
-                                      .copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .fontColor,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                              ],
-                            ),
-                        if (isPromoValid!)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                getTranslated(context, 'PROMO_CODE_DIS_LBL')!,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall!
-                                    .copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .lightBlack2,
-                                    ),
-                              ),
-                              buildConvertedPrice(
-                                context,
-                                promoAmount,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall!
-                                    .copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .fontColor,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          )
-                        else
-                          const SizedBox.shrink(),
-                        if (isUseWallet!)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                getTranslated(context, 'WALLET_BAL')!,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall!
-                                    .copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .lightBlack2,
-                                    ),
-                              ),
-                              buildConvertedPrice(
-                                context,
-                                usedBalance,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall!
-                                    .copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .fontColor,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          )
-                        else
-                          const SizedBox.shrink(),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                getTranslated(context, 'TOTAL_PRICE')!,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall!
-                                    .copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .lightBlack2,
-                                    ),
-                              ),
-                              usedBalance > 0
-                                  ? buildConvertedPrice(
-                                      context,
-                                      totalPrice,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium!
-                                          .copyWith(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .fontColor,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                    )
-                                  : isStorePickUp == "false"
-                                      ? buildConvertedPrice(
-                                          context,
-                                          totalPrice + deliveryCharge,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium!
-                                              .copyWith(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .fontColor,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                        )
-                                      : buildConvertedPrice(
-                                          context,
-                                          totalPrice,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium!
-                                              .copyWith(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .fontColor,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                        ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          child: TextField(
-                            controller: noteC,
-                            style: Theme.of(context).textTheme.titleSmall,
-                            decoration: InputDecoration(
-                              contentPadding:
-                                  const EdgeInsets.symmetric(horizontal: 10),
-                              border: InputBorder.none,
-                              filled: true,
-                              fillColor: Theme.of(context)
-                                  .colorScheme
-                                  .primarytheme
-                                  .withOpacity(0.1),
-                              hintText: getTranslated(context, 'NOTE'),
-                            ),
-                          ),
-                        ),
-                        if (cartList[0].productList![0].productType !=
-                            'digital_product')
-                          const SizedBox.shrink()
-                        else
-                          Column(
-                            children: [
-                              Container(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 5),
-                                child: TextFormField(
-                                  validator: (val) {
-                                    if (val == null || val.trim().isEmpty) {
-                                      return getTranslated(
-                                              context, 'MOBILE_REQUIRED') ??
-                                          'Mobile number is required';
-                                    }
-                                    // Add more mobile-specific validations if needed
-                                    return null;
-                                  },
-                                  controller: mobileController,
-                                  style: Theme.of(context).textTheme.titleSmall,
-                                  decoration: InputDecoration(
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 10),
-                                    border: InputBorder.none,
-                                    filled: true,
-                                    fillColor: Theme.of(context)
-                                        .colorScheme
-                                        .primarytheme
-                                        .withOpacity(0.1),
-                                    hintText: getTranslated(
-                                            context, 'ENTER_MOBILE_NUMBER') ??
-                                        'Enter mobile number',
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 5),
-                                child: TextFormField(
-                                  validator: (val) => validateEmail(
-                                    val!,
-                                    getTranslated(context, 'EMAIL_REQUIRED'),
-                                    getTranslated(context, 'VALID_EMAIL'),
-                                  ),
-                                  controller: emailController,
-                                  style: Theme.of(context).textTheme.titleSmall,
-                                  decoration: InputDecoration(
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 10),
-                                    border: InputBorder.none,
-                                    filled: true,
-                                    fillColor: Theme.of(context)
-                                        .colorScheme
-                                        .primarytheme
-                                        .withOpacity(0.1),
-                                    hintText: getTranslated(
-                                            context, 'ENTER_EMAIL_ID_LBL') ??
-                                        'Enter email',
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: Text(
-                  getTranslated(context, 'CANCEL')!,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.lightBlack,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                onPressed: () {
-                  checkoutState?.call(() {
-                    _placeOrder = true;
-                    isPromoValid = false;
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              TextButton(
-                child: Text(
-                  getTranslated(context, 'DONE')!,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primarytheme,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                onPressed: () {
-                  // Validate form for digital products (mobile, email)
-                  if (cartList[0].productList![0].productType ==
-                      'digital_product') {
-                    _log.info(
-                        'Validating form for digital product: ${validateAndSave()}');
-                    if (!validateAndSave()) {
-                      return; // Stop if validation fails
-                    }
-                  }
-                  // Proceed to place order and close dialog
-                  placeOrder('');
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        ),
-      );
-    },
-    barrierLabel: '',
-    context: context,
-    pageBuilder: (context, animation1, animation2) {
-      return const SizedBox.shrink();
-    },
-  ).then(
-    (value) => setState(() {
-      confDia = true;
-    }),
-  );
-}
     Future<void> checkDeliverable(
   int from, {
   bool showErrorMessage = true,
@@ -5956,7 +5575,7 @@ Widget address() {
 
 
 
-    attachPrescriptionImages(List<SectionModel> cartList) {
+  attachPrescriptionImages(List<SectionModel> cartList) {
       bool isAttachmentRequired = false;
       for (int i = 0; i < cartList.length; i++) {
         if (cartList[i].productList![0].is_attchachment_required == "1") {
@@ -6053,6 +5672,188 @@ Widget address() {
               ),
             )
           : const SizedBox.shrink();
+    }
+
+    //─────────────────────────────────────────────
+    // Fetch delivery date and time slots (copied from old Payment screen)
+    Future<void> _getdateTime() async {
+      _isNetworkAvailable = await isNetworkAvailable();
+      if (_isNetworkAvailable) {
+        timeSlotList.clear();
+        try {
+          final parameter = {
+            TYPE: PAYMENT_METHOD,
+            USER_ID: context.read<UserProvider>().userId,
+          };
+          apiBaseHelper.postAPICall(getSettingApi, parameter).then(
+            (getdata) async {
+              final bool error = getdata["error"];
+              if (!error) {
+                final data = getdata["data"];
+                final timeSlot = data["time_slot_config"];
+                allowDay = timeSlot["allowed_days"];
+                isTimeSlot =
+                    timeSlot["is_time_slots_enabled"] == "1" ? true : false;
+                startingDate = timeSlot["starting_date"];
+                final timeSlots = data["time_slots"];
+                timeSlotList = (timeSlots as List)
+                    .map((ts) => Model.fromTimeSlot(ts))
+                    .toList();
+
+                // Default to first available date/time when none selected
+                if ((selDate == null || selDate!.isEmpty) && startingDate != null) {
+                  final DateTime first = DateTime.parse(startingDate!);
+                  selDate = DateFormat('yyyy-MM-dd').format(first);
+                  selectedDate = 0;
+                }
+                if ((selTime == null || selTime!.isEmpty) && timeSlotList.isNotEmpty) {
+                  selTime = timeSlotList[0].name;
+                  selectedTime = 0;
+                }
+              }
+              if (mounted) {
+                checkoutState?.call(() {});
+                setState(() {
+                  _isTimeSlotLoading = false;
+                });
+              }
+            },
+            onError: (error) {
+              setSnackbar(error.toString(), context);
+            },
+          );
+        } on TimeoutException catch (_) {
+          setSnackbar(getTranslated(context, 'somethingMSg')!, context);
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _isNetworkAvailable = false;
+          });
+        }
+      }
+    }
+
+    // Date cell widget used for selecting delivery date
+    Widget dateCell(int index) {
+      final DateTime today = DateTime.parse(startingDate!);
+      return InkWell(
+        child: Container(
+          width: 65,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: selectedDate == index
+                ? Theme.of(context).colorScheme.primarytheme
+                : null,
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                DateFormat('EEE').format(today.add(Duration(days: index))),
+                style: TextStyle(
+                  color: selectedDate == index
+                      ? Theme.of(context).colorScheme.white
+                      : Theme.of(context).colorScheme.lightBlack2,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Text(
+                  DateFormat('dd').format(today.add(Duration(days: index))),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: selectedDate == index
+                        ? Theme.of(context).colorScheme.white
+                        : Theme.of(context).colorScheme.lightBlack2,
+                  ),
+                ),
+              ),
+              Text(
+                DateFormat('MMM').format(today.add(Duration(days: index))),
+                style: TextStyle(
+                  color: selectedDate == index
+                      ? Theme.of(context).colorScheme.white
+                      : Theme.of(context).colorScheme.lightBlack2,
+                ),
+              ),
+            ],
+          ),
+        ),
+        onTap: () {
+          final DateTime date = today.add(Duration(days: index));
+          if (mounted) {
+            checkoutState?.call(() {
+              selectedDate = index;
+              selectedTime = null;
+              selTime = null;
+              selDate = DateFormat('yyyy-MM-dd').format(date);
+            });
+          } else {
+            selectedDate = index;
+            selectedTime = null;
+            selTime = null;
+            selDate = DateFormat('yyyy-MM-dd').format(date);
+          }
+          timeModel.clear();
+          final DateTime cur = DateTime.now();
+          final DateTime tdDate = DateTime(cur.year, cur.month, cur.day);
+          if (date == tdDate) {
+            if (timeSlotList.isNotEmpty) {
+              for (int i = 0; i < timeSlotList.length; i++) {
+                final DateTime cur = DateTime.now();
+                final String time = timeSlotList[i].lastTime!;
+                final DateTime last = DateTime(
+                  cur.year,
+                  cur.month,
+                  cur.day,
+                  int.parse(time.split(':')[0]),
+                  int.parse(time.split(':')[1]),
+                  int.parse(time.split(':')[2]),
+                );
+                if (cur.isBefore(last)) {
+                  timeModel.add(RadioModel(
+                    isSelected: i == selectedTime ? true : false,
+                    name: timeSlotList[i].name,
+                    img: '',
+                  ));
+                }
+              }
+            }
+          } else {
+            if (timeSlotList.isNotEmpty) {
+              for (int i = 0; i < timeSlotList.length; i++) {
+                timeModel.add(RadioModel(
+                  isSelected: i == selectedTime ? true : false,
+                  name: timeSlotList[i].name,
+                  img: '',
+                ));
+              }
+            }
+          }
+          checkoutState?.call(() {});
+        },
+      );
+    }
+
+    // Time slot radio item
+    Widget timeSlotItem(int index) {
+      return InkWell(
+        onTap: () {
+          if (mounted) {
+            checkoutState?.call(() {
+              selectedTime = index;
+              selTime = timeModel[selectedTime!].name;
+              for (final element in timeModel) {
+                element.isSelected = false;
+              }
+              timeModel[index].isSelected = true;
+            });
+          }
+        },
+        child: RadioItem(timeModel[index]),
+      );
     }
 
   }

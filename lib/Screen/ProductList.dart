@@ -25,6 +25,7 @@ import '../Model/Section_Model.dart';
 import '../ui/styles/DesignConfig.dart';
 import '../ui/widgets/AppBarWidget.dart';
 import '../utils/blured_router.dart';
+import 'cart/Cart.dart';
 import 'HomePage.dart';
 import 'Search.dart';
 
@@ -671,6 +672,56 @@ class StateProduct extends State<ProductListScreen>
                                             )
                                           else
                                             const SizedBox.shrink(),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                                        child: LayoutBuilder(
+                                          builder: (context, constraints) {
+                                            return SizedBox(
+                                              width: constraints.maxWidth * 0.2,
+                                              height: 30,
+                                              child: TextButton(
+                                                style: TextButton.styleFrom(
+                                                  padding: EdgeInsets.zero,
+                                                  backgroundColor: Theme.of(context).colorScheme.primarytheme,
+                                                ),
+                                                onPressed: () {
+                                                  final String userId = context.read<UserProvider>().userId;
+                                                  if (userId.isEmpty) {
+                                                    addToCart(
+                                                      index,
+                                                      (int.parse(_controller[index].text) + int.parse(model.qtyStepSize!)).toString(),
+                                                      1,
+                                                    );
+                                                    Navigator.pushNamed(
+                                                      context,
+                                                      Routers.loginScreen,
+                                                      arguments: {
+                                                        "isPop": false,
+                                                        "classType": const Cart(fromBottom: false, buyNow: true),
+                                                      },
+                                                    );
+                                                  } else {
+                                                    addToCart(
+                                                      index,
+                                                      (int.parse(_controller[index].text) + int.parse(model.qtyStepSize!)).toString(),
+                                                      1,
+                                                      intent: true,
+                                                    );
+                                                  }
+                                                },
+                                                child: Text(
+                                                  getTranslated(context, 'BUYNOW2') ?? '',
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                                                        color: colors.whiteTemp,
+                                                        fontWeight: FontWeight.normal,
+                                                      ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
                                         ],
                                       )
                                     else
@@ -905,7 +956,7 @@ class StateProduct extends State<ProductListScreen>
     }
   }
 
-  removeFromCart(int index) async {
+  removeFromCart(int index, {bool intent = false}) async {
     _isNetworkAvail = await isNetworkAvailable();
     if (_isNetworkAvail) {
       if (context.read<UserProvider>().userId != "") {
@@ -942,6 +993,18 @@ class StateProduct extends State<ProductListScreen>
                 .map((cart) => SectionModel.fromCart(cart))
                 .toList();
             context.read<CartProvider>().setCartlist(cartList);
+            if (intent) {
+              cartTotalClear();
+              Navigator.push(
+                context,
+                CupertinoPageRoute(
+                  builder: (context) => const Cart(
+                    fromBottom: false,
+                    buyNow: true,
+                  ),
+                ),
+              );
+            }
           } else {
             setSnackbar(msg!, context);
           }
@@ -1752,6 +1815,47 @@ class StateProduct extends State<ProductListScreen>
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  const SizedBox(height: 5),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: SimBtn(
+                        width: 0.5,
+                        height: 28,
+                        title: getTranslated(context, 'BUYNOW2'),
+                        onBtnSelected: () async {
+                          final String userId = context.read<UserProvider>().userId;
+                          if (userId.isEmpty) {
+                            await addToCart(
+                              index,
+                              (int.parse(_controller[index].text) +
+                                      int.parse(model.qtyStepSize!))
+                                  .toString(),
+                              1,
+                            );
+                            Navigator.pushNamed(
+                              context,
+                              Routers.loginScreen,
+                              arguments: {
+                                "isPop": false,
+                                "classType": const Cart(fromBottom: false, buyNow: true),
+                              },
+                            );
+                          } else {
+                            await addToCart(
+                              index,
+                              (int.parse(_controller[index].text) +
+                                      int.parse(model.qtyStepSize!))
+                                  .toString(),
+                              1,
+                              intent: true,
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -1993,7 +2097,7 @@ class StateProduct extends State<ProductListScreen>
     );
   }
 
-  Future<void> addToCart(int index, String qty, int from) async {
+  Future<void> addToCart(int index, String qty, int from, {bool intent = false}) async {
     _isNetworkAvail = await isNetworkAvailable();
     if (_isNetworkAvail) {
       if (context.read<UserProvider>().userId != "") {
@@ -2028,6 +2132,18 @@ class StateProduct extends State<ProductListScreen>
                 .map((cart) => SectionModel.fromCart(cart))
                 .toList();
             context.read<CartProvider>().setCartlist(cartList);
+            if (intent) {
+              cartTotalClear();
+              Navigator.push(
+                context,
+                CupertinoPageRoute(
+                  builder: (context) => const Cart(
+                    fromBottom: false,
+                    buyNow: true,
+                  ),
+                ),
+              );
+            }
           } else {
             setSnackbar(msg!, context);
           }
@@ -2101,6 +2217,18 @@ class StateProduct extends State<ProductListScreen>
         setState(() {
           _isProgress = false;
         });
+    if (intent) {
+      cartTotalClear();
+      Navigator.push(
+        context,
+        CupertinoPageRoute(
+          builder: (context) => const Cart(
+            fromBottom: false,
+            buyNow: true,
+          ),
+        ),
+      );
+    }
       }
     } else {
       if (mounted) {

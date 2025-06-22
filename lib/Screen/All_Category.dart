@@ -68,12 +68,10 @@ class AllCategoryState extends State<AllCategory> {
       onTap: () {
         Navigator.pushNamed(
           context,
-          Routers.productListScreen,
+          Routers.categoryProductsScreen,
           arguments: {
             "name": category.name,
             "id": category.id,
-            "tag": false,
-            "fromSeller": false,
           },
         );
       },

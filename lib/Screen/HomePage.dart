@@ -605,12 +605,10 @@ Widget _slider() {
                 onTap: () async {
                   await Navigator.pushNamed(
                     context,
-                    Routers.productListScreen,
+                    Routers.categoryProductsScreen,
                     arguments: {
                       "name": cat.name,
                       "id": cat.id,
-                      "tag": false,
-                      "fromSeller": false,
                     },
                   );
                 },
@@ -1348,12 +1346,10 @@ Widget _buildImagePageItem(Model slider) {
         if (item.subList == null || item.subList!.isEmpty) {
           Navigator.pushNamed(
             context,
-            Routers.productListScreen,
+            Routers.categoryProductsScreen,
             arguments: {
               "name": item.name,
               "id": item.id,
-              "tag": false,
-              "fromSeller": false,
             },
           );
         } else {

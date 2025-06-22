@@ -26,6 +26,7 @@ import '../styles/DesignConfig.dart';
 import '../../utils/blured_router.dart';
 import '../../Screen/HomePage.dart';
 import '../../Screen/Search.dart';
+import '../../Screen/cart/Cart.dart';
 
 class ProductListContent extends StatefulWidget {
   final String? name;
@@ -548,122 +549,145 @@ class StateProduct extends State<ProductListContent>
                                         );
                                       },
                                     ),
-                                    if (_controller[index].text != "0")
-                                      Row(
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          if (model.availability == "0")
-                                            const SizedBox.shrink()
-                                          else if (cartBtnList)
+                                          if (_controller[index].text != "0" &&
+                                              model.availability != "0" &&
+                                              cartBtnList)
                                             Row(
+                                              mainAxisSize: MainAxisSize.min,
                                               children: <Widget>[
-                                                Row(
-                                                  children: <Widget>[
-                                                    InkWell(
-                                                      child: Card(
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius.circular(50),
-                                                        ),
-                                                        child: const Padding(
-                                                          padding: EdgeInsets.all(8.0),
-                                                          child: Icon(
-                                                            Icons.remove,
-                                                            size: 15,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      onTap: () {
-                                                        if (int.parse(_controller[index].text) > 0) {
-                                                          removeFromCart(index);
-                                                        }
-                                                      },
+                                                InkWell(
+                                                  child: Card(
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(50),
                                                     ),
-                                                    Container(
-                                                      width: 37,
-                                                      height: 20,
-                                                      decoration: BoxDecoration(
-                                                        color: Theme.of(context)
-                                                            .colorScheme
-                                                            .white,
-                                                        borderRadius: BorderRadius.circular(5),
-                                                      ),
-                                                      child: Stack(
-                                                        children: [
-                                                          TextField(
-                                                            textAlign: TextAlign.center,
-                                                            readOnly: true,
-                                                            style: TextStyle(
-                                                                fontSize: 12,
-                                                                color: Theme.of(context)
-                                                                    .colorScheme
-                                                                    .fontColor),
-                                                            controller: _controller[index],
-                                                            decoration: const InputDecoration(
-                                                              border: InputBorder.none,
-                                                            ),
-                                                          ),
-                                                          PopupMenuButton<String>(
-                                                            tooltip: '',
-                                                            icon: const Icon(
-                                                              Icons.arrow_drop_down,
-                                                              size: 1,
-                                                            ),
-                                                            onSelected: (String value) {
-                                                              addToCart(index, value, 2);
-                                                            },
-                                                            itemBuilder: (BuildContext context) {
-                                                              return model.itemsCounter!.map<PopupMenuItem<String>>(
-                                                                  (String value) {
-                                                                return PopupMenuItem(
-                                                                  value: value,
-                                                                  child: Text(
-                                                                    value,
-                                                                    style: TextStyle(
-                                                                        color: Theme.of(context)
-                                                                            .colorScheme
-                                                                            .fontColor),
-                                                                  ),
-                                                                );
-                                                              }).toList();
-                                                            },
-                                                          ),
-                                                        ],
+                                                    child: const Padding(
+                                                      padding: EdgeInsets.all(8.0),
+                                                      child: Icon(
+                                                        Icons.remove,
+                                                        size: 15,
                                                       ),
                                                     ),
-                                                    InkWell(
-                                                      child: Card(
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius.circular(50),
-                                                        ),
-                                                        child: const Padding(
-                                                          padding: EdgeInsets.all(8.0),
-                                                          child: Icon(
-                                                            Icons.add,
-                                                            size: 15,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      onTap: () {
-                                                        addToCart(
-                                                          index,
-                                                          (int.parse(_controller[index].text) +
-                                                                  int.parse(model.qtyStepSize!))
-                                                              .toString(),
-                                                          2,
-                                                        );
-                                                      },
-                                                    ),
-                                                  ],
+                                                  ),
+                                                  onTap: () {
+                                                    if (int.parse(_controller[index].text) > 0) {
+                                                      removeFromCart(index);
+                                                    }
+                                                  },
                                                 ),
-                                              ],
-                                            )
-                                          else
-                                            const SizedBox.shrink(),
+                                                Container(
+                                                  width: 37,
+                                                  height: 20,
+                                                  decoration: BoxDecoration(
+                                                    color: Theme.of(context).colorScheme.white,
+                                                    borderRadius: BorderRadius.circular(5),
+                                                  ),
+                                                  child: Stack(
+                                                    children: [
+                                                      TextField(
+                                                        textAlign: TextAlign.center,
+                                                        readOnly: true,
+                                                        style: TextStyle(
+                                                            fontSize: 12,
+                                                            color: Theme.of(context).colorScheme.fontColor),
+                                                        controller: _controller[index],
+                                                        decoration: const InputDecoration(
+                                                          border: InputBorder.none,
+                                                        ),
+                                                      ),
+                                                      PopupMenuButton<String>(
+                                                        tooltip: '',
+                                                        icon: const Icon(
+                                                          Icons.arrow_drop_down,
+                                                          size: 1,
+                                                        ),
+                                                        onSelected: (String value) {
+                                                          addToCart(index, value, 2);
+                                                        },
+                                                        itemBuilder: (BuildContext context) {
+                                                          return model.itemsCounter!.map<PopupMenuItem<String>>((String value) {
+                                                            return PopupMenuItem(
+                                                              value: value,
+                                                              child: Text(
+                                                                value,
+                                                                style: TextStyle(color: Theme.of(context).colorScheme.fontColor),
+                                                              ),
+                                                            );
+                                                          }).toList();
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                InkWell(
+                                                  child: Card(
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(50),
+                                                    ),
+                                                    child: const Padding(
+                                                      padding: EdgeInsets.all(8.0),
+                                                      child: Icon(
+                                                        Icons.add,
+                                                        size: 15,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  onTap: () {
+                                                    addToCart(
+                                                      index,
+                                                      (int.parse(_controller[index].text) + int.parse(model.qtyStepSize!)).toString(),
+                                                      2,
+                                                    );
+                                                  },
+                                                ),
+                                               ],
+                                             ),
+                                           const SizedBox(height: 5),
+                                           SizedBox(
+                                            width: 110,
+                                            height: 32,
+                                          child: SimBtn(
+                                            width: 1,
+                                            height: 32,
+                                            title: getTranslated(context, 'BUYNOW2'),
+                                            onBtnSelected: () async {
+                                              final String userId = context.read<UserProvider>().userId;
+                                              if (userId.isEmpty) {
+                                                await addToCart(
+                                                  index,
+                                                  (int.parse(_controller[index].text) +
+                                                          int.parse(model.qtyStepSize!))
+                                                      .toString(),
+                                                  1,
+                                                );
+                                                Navigator.pushNamed(
+                                                  context,
+                                                  Routers.loginScreen,
+                                                  arguments: {
+                                                    "isPop": false,
+                                                    "classType": const Cart(fromBottom: false, buyNow: true),
+                                                  },
+                                                );
+                                              } else {
+                                                await addToCart(
+                                                  index,
+                                                  (int.parse(_controller[index].text) +
+                                                          int.parse(model.qtyStepSize!))
+                                                      .toString(),
+                                                  1,
+                                                  intent: true,
+                                                );
+                                              }
+                                            },
+                                          ),
+                                          ),
                                         ],
-                                      )
-                                    else
-                                      const SizedBox.shrink(),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -894,7 +918,7 @@ class StateProduct extends State<ProductListContent>
     }
   }
 
-  removeFromCart(int index) async {
+  removeFromCart(int index, {bool intent = false}) async {
     _isNetworkAvail = await isNetworkAvailable();
     if (_isNetworkAvail) {
       if (context.read<UserProvider>().userId != "") {
@@ -931,6 +955,18 @@ class StateProduct extends State<ProductListContent>
                 .map((cart) => SectionModel.fromCart(cart))
                 .toList();
             context.read<CartProvider>().setCartlist(cartList);
+            if (intent) {
+              cartTotalClear();
+              Navigator.push(
+                context,
+                CupertinoPageRoute(
+                  builder: (context) => const Cart(
+                    fromBottom: false,
+                    buyNow: true,
+                  ),
+                ),
+              );
+            }
           } else {
             setSnackbar(msg!, context);
           }
@@ -1742,6 +1778,146 @@ if (widget.id != null) {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                    child: Wrap(
+                      spacing: 5,
+                      runSpacing: 5,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        if (_controller[index].text != "0" &&
+                            model.availability != "0" &&
+                            cartBtnList)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              InkWell(
+                                child: Card(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(50),
+                                  ),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Icon(
+                                      Icons.remove,
+                                      size: 15,
+                                    ),
+                                  ),
+                                ),
+                                onTap: () {
+                                  if (int.parse(_controller[index].text) > 0) {
+                                    removeFromCart(index);
+                                  }
+                                },
+                              ),
+                              Container(
+                                width: 37,
+                                height: 20,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.white,
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                child: Stack(
+                                  children: [
+                                    TextField(
+                                      textAlign: TextAlign.center,
+                                      readOnly: true,
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: Theme.of(context).colorScheme.fontColor),
+                                      controller: _controller[index],
+                                      decoration: const InputDecoration(
+                                        border: InputBorder.none,
+                                      ),
+                                    ),
+                                    PopupMenuButton<String>(
+                                      tooltip: '',
+                                      icon: const Icon(
+                                        Icons.arrow_drop_down,
+                                        size: 0,
+                                      ),
+                                      onSelected: (String value) {
+                                        addToCart(index, value, 2);
+                                      },
+                                      itemBuilder: (BuildContext context) {
+                                        return model.itemsCounter!.map<PopupMenuItem<String>>((String value) {
+                                          return PopupMenuItem(
+                                            value: value,
+                                            child: Text(
+                                              value,
+                                              style: TextStyle(color: Theme.of(context).colorScheme.fontColor),
+                                            ),
+                                          );
+                                        }).toList();
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              InkWell(
+                                child: Card(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(50),
+                                  ),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Icon(
+                                      Icons.add,
+                                      size: 15,
+                                    ),
+                                  ),
+                                ),
+                                onTap: () {
+                                  addToCart(
+                                    index,
+                                    (int.parse(_controller[index].text) + int.parse(model.qtyStepSize!)).toString(),
+                                    2,
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        SizedBox(
+                          width: 110,
+                          height: 32,
+                          child: SimBtn(
+                            width: 1,
+                            height: 32,
+                            title: getTranslated(context, 'BUYNOW2'),
+                            onBtnSelected: () async {
+                              final String userId = context.read<UserProvider>().userId;
+                              if (userId.isEmpty) {
+                                await addToCart(
+                                  index,
+                                  (int.parse(_controller[index].text) +
+                                          int.parse(model.qtyStepSize!))
+                                      .toString(),
+                                  1,
+                                );
+                                Navigator.pushNamed(
+                                  context,
+                                  Routers.loginScreen,
+                                  arguments: {
+                                    "isPop": false,
+                                    "classType": const Cart(fromBottom: false, buyNow: true),
+                                  },
+                                );
+                              } else {
+                                await addToCart(
+                                  index,
+                                  (int.parse(_controller[index].text) +
+                                          int.parse(model.qtyStepSize!))
+                                      .toString(),
+                                  1,
+                                  intent: true,
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -1983,123 +2159,149 @@ if (widget.id != null) {
     );
   }
 
-  Future<void> addToCart(int index, String qty, int from) async {
-    _isNetworkAvail = await isNetworkAvailable();
-    if (_isNetworkAvail) {
-      if (context.read<UserProvider>().userId != "") {
-        if (mounted) {
-          setState(() {
-            _isProgress = true;
-          });
+  
+Future<void> addToCart(
+  int index,
+  String qty,
+  int from, {
+  bool intent = false,   //  true when the button was “Buy Now”
+}) async {
+  _isNetworkAvail = await isNetworkAvailable();
+  if (!_isNetworkAvail) {
+    if (mounted) setState(() => _isNetworkAvail = false);
+    return;
+  }
+
+  // ─────────────── 1) SIGNED-IN USER ───────────────
+  if (context.read<UserProvider>().userId.isNotEmpty) {
+    if (mounted) setState(() => _isProgress = true);
+
+    // respect minimum-order quantity
+    if (int.parse(qty) < productList[index].minOrderQuntity!) {
+      qty = productList[index].minOrderQuntity.toString();
+      setSnackbar("${getTranslated(context, 'MIN_MSG')}$qty", context);
+    }
+
+    final parameter = {
+      USER_ID:            context.read<UserProvider>().userId,
+      PRODUCT_VARIENT_ID: productList[index]
+                            .prVarientList![productList[index].selVarient!].id,
+      QTY:                qty,
+    };
+
+    apiBaseHelper.postAPICall(manageCartApi, parameter).then((getdata) {
+      final bool   error = getdata["error"];
+      final String? msg  = getdata["message"];
+
+      if (!error) {
+        // update local providers
+        final data = getdata["data"];
+        final cart = getdata["cart"];
+        final List<SectionModel> cartList =
+            (cart as List).map((e) => SectionModel.fromCart(e)).toList();
+
+        context.read<UserProvider>().setCartCount(data['cart_count']);
+        productList[index]
+            .prVarientList![productList[index].selVarient!]
+            .cartCount = data['total_quantity'].toString();
+        context.read<CartProvider>().setCartlist(cartList);
+
+        // ★ NEW: go straight to Checkout when “Buy Now” was tapped
+        if (intent) {
+          cartTotalClear();
+          Navigator.push(
+            context,
+            CupertinoPageRoute(
+              builder: (_) => const Cart(
+                fromBottom: false,
+                buyNow: true,
+              ),
+            ),
+          );
         }
-        if (int.parse(qty) < productList[index].minOrderQuntity!) {
-          qty = productList[index].minOrderQuntity.toString();
-          setSnackbar("${getTranslated(context, 'MIN_MSG')}$qty", context);
-        }
-        final parameter = {
-          USER_ID: context.read<UserProvider>().userId,
-          PRODUCT_VARIENT_ID: productList[index]
-              .prVarientList![productList[index].selVarient!]
-              .id,
-          QTY: qty,
-        };
-        apiBaseHelper.postAPICall(manageCartApi, parameter).then((getdata) {
-          final bool error = getdata["error"];
-          final String? msg = getdata["message"];
-          if (!error) {
-            final data = getdata["data"];
-            final String? qty = data['total_quantity'];
-            context.read<UserProvider>().setCartCount(data['cart_count']);
-            productList[index]
-                .prVarientList![productList[index].selVarient!]
-                .cartCount = qty.toString();
-            final cart = getdata["cart"];
-            final List<SectionModel> cartList = (cart as List)
-                .map((cart) => SectionModel.fromCart(cart))
-                .toList();
-            context.read<CartProvider>().setCartlist(cartList);
-          } else {
-            setSnackbar(msg!, context);
-          }
-          if (mounted) {
-            setState(() {
-              _isProgress = false;
-            });
-          }
-        }, onError: (error) {
-          setSnackbar(error.toString(), context);
-          if (mounted) {
-            setState(() {
-              _isProgress = false;
-            });
-          }
-        },);
       } else {
-        setState(() {
-          _isProgress = true;
-        });
-        if (from == 1) {
-          final int cartCount = await db.getTotalCartCount(context);
-          if (int.parse(MAX_ITEMS!) > cartCount) {
-            final List<Product> prList = [];
-            final bool add = await db.insertCart(
-                productList[index].id!,
-                productList[index]
-                    .prVarientList![productList[index].selVarient!]
-                    .id!,
-                qty,
-                productList[index].productType!,
-                context,);
-            if (add) {
-              prList.add(productList[index]);
-              context.read<CartProvider>().addCartItem(SectionModel(
-                    qty: qty,
-                    productList: prList,
-                    varientId: productList[index]
-                        .prVarientList![productList[index].selVarient!]
-                        .id,
-                    id: productList[index].id,
-                  ),);
-            }
-          } else {
-            setSnackbar(
-                "In Cart maximum ${int.parse(MAX_ITEMS!)} product allowed",
-                context,);
-          }
-        } else {
-          if (int.parse(qty) >
-              int.parse(productList[index].itemsCounter!.last)) {
-            setSnackbar(
-                "${getTranslated(context, 'MAXQTY')!} ${productList[index].itemsCounter!.last}",
-                context,);
-          } else {
-            context.read<CartProvider>().updateCartItem(
-                productList[index].id,
-                qty,
-                productList[index].selVarient!,
-                productList[index]
-                    .prVarientList![productList[index].selVarient!]
-                    .id!,);
-            db.updateCart(
-                productList[index].id!,
-                productList[index]
-                    .prVarientList![productList[index].selVarient!]
-                    .id!,
-                qty,);
-          }
-        }
-        setState(() {
-          _isProgress = false;
-        });
+        setSnackbar(msg!, context);
+      }
+
+      if (mounted) setState(() => _isProgress = false);
+    }, onError: (error) {
+      setSnackbar(error.toString(), context);
+      if (mounted) setState(() => _isProgress = false);
+    });
+
+    return; // done for logged-in users
+  }
+
+  // ─────────────── 2) GUEST USER ───────────────
+  if (mounted) setState(() => _isProgress = true);
+
+  if (from == 1) {
+    final int cartCount = await db.getTotalCartCount(context);
+    if (int.parse(MAX_ITEMS!) > cartCount) {
+      final bool added = await db.insertCart(
+        productList[index].id!,
+        productList[index].prVarientList![productList[index].selVarient!].id!,
+        qty,
+        productList[index].productType!,
+        context,
+      );
+      if (added) {
+        context.read<CartProvider>().addCartItem(
+          SectionModel(
+            qty: qty,
+            productList: [productList[index]],
+            varientId: productList[index]
+                         .prVarientList![productList[index].selVarient!].id,
+            id: productList[index].id,
+          ),
+        );
       }
     } else {
-      if (mounted) {
-        setState(() {
-          _isNetworkAvail = false;
-        });
-      }
+      setSnackbar(
+        "In Cart maximum ${int.parse(MAX_ITEMS!)} product allowed",
+        context,
+      );
+    }
+  } else {
+    if (int.parse(qty) >
+        int.parse(productList[index].itemsCounter!.last)) {
+      setSnackbar(
+        "${getTranslated(context, 'MAXQTY')!} ${productList[index].itemsCounter!.last}",
+        context,
+      );
+    } else {
+      context.read<CartProvider>().updateCartItem(
+        productList[index].id,
+        qty,
+        productList[index].selVarient!,
+        productList[index]
+            .prVarientList![productList[index].selVarient!].id!,
+      );
+      db.updateCart(
+        productList[index].id!,
+        productList[index]
+            .prVarientList![productList[index].selVarient!].id!,
+        qty,
+      );
     }
   }
+
+  if (mounted) setState(() => _isProgress = false);
+
+  // ★ NEW: navigate after “Buy Now” for guest users
+  if (intent) {
+    cartTotalClear();
+    Navigator.push(
+      context,
+      CupertinoPageRoute(
+        builder: (_) => const Cart(
+          fromBottom: false,
+          buyNow: true,
+        ),
+      ),
+    );
+  }
+}
 
   _showForm() {
     return Column(

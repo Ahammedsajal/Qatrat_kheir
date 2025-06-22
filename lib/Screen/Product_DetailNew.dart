@@ -1598,6 +1598,7 @@ class StateItem extends State<ProductDetail> with TickerProviderStateMixin {
                       CupertinoPageRoute(
                         builder: (context) => const Cart(
                           fromBottom: false,
+                          buyNow: true,
                         ),
                       ),
                     );
@@ -1651,6 +1652,7 @@ class StateItem extends State<ProductDetail> with TickerProviderStateMixin {
                     CupertinoPageRoute(
                       builder: (context) => const Cart(
                         fromBottom: false,
+                        buyNow: true,
                       ),
                     ),
                   );
